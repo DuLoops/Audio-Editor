@@ -54,7 +54,6 @@ namespace WindowsFormsApp
             waveHeader.subchunk2ID = reader.ReadInt32();
             waveHeader.subchunk2Size = reader.ReadInt32();
             byteArray = reader.ReadBytes(waveHeader.subchunk2Size);
-            //setBuffer(byteArray.);
 
             short[] shortArray = new short[waveHeader.subchunk2Size / waveHeader.blockAligh];
 
@@ -63,6 +62,8 @@ namespace WindowsFormsApp
                 shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
             }
             doubleArray = shortArray.Select(x => (double)x).ToArray();
+
+
         }
 
 
@@ -105,7 +106,6 @@ namespace WindowsFormsApp
 
         private void openWaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "Wave File ((.wav)|*.wav;";
             if (open.ShowDialog() != DialogResult.OK) return;
