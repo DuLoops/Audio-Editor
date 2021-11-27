@@ -13,6 +13,12 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace WindowsFormsApp
 {
+    public struct Complex
+    {
+        public double re;
+        public double im;
+    }
+
     public partial class Form1 : Form
     {
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
@@ -28,6 +34,7 @@ namespace WindowsFormsApp
         public static extern uint getBufferLen();
 
         WaveHeader waveHeader = new WaveHeader();
+
         byte[] byteArray;
         double[] doubleArray;
 
@@ -58,6 +65,42 @@ namespace WindowsFormsApp
                 shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
             }
             doubleArray = shortArray.Select(x => (double)x).ToArray();
+        }
+
+        public Complex DFT(double[] S)
+        {
+            int len = S.Length;
+            Complex[] A = new Complex[len];
+
+            for (int f = 0; f < len; f++)
+            {
+                A[f].im = 0;
+                A[f].re = 0;
+                for (int t = 0; t < len; t++)
+                {
+                    A[f].re += S[t] * Math.Cos(2 * Math.PI * t * f / len);
+                    A[f].im -= S[t] * Math.Sin(2 * Math.PI * t * f / len);
+                }
+                A[f].re /= len;
+                A[f].im /= len;
+            }
+            return A[len];
+        }
+
+        public void IDFT(Complex[] A)
+        {
+            int len = A.Length;
+            double[] S = new double[len];
+
+            for (int t = 0; t < len; t++)
+            {
+                S[t] = 0;
+                for (int f = 0; f < len; f++)
+                {
+                    S[t] += A[f].re * Math.Cos(2 * Math.PI * f * t / len) - A[f].im * Math.Sin(2 * Math.PI * f * t / len);
+                }
+            }
+            doubleArray = S;
         }
 
         public void displayWave()
@@ -117,5 +160,6 @@ namespace WindowsFormsApp
         {
 
         }
+
     }
 }
