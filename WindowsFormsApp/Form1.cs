@@ -19,7 +19,7 @@ namespace WindowsFormsApp
         public double im;
     }
 
-    public partial class Form1 : Form
+    public unsafe partial class Form1 : Form
     {
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern int record();
@@ -67,24 +67,30 @@ namespace WindowsFormsApp
             doubleArray = shortArray.Select(x => (double)x).ToArray();
         }
 
-        public Complex DFT(double[] S)
+        public Complex DFT()
         {
-            int len = S.Length;
-            Complex[] A = new Complex[len];
+            IntPtr b = getBuffer();
+            uint data = getBufferLen();
 
-            for (int f = 0; f < len; f++)
+            Complex[] A = new Complex[data];
+
+            unsafe
             {
-                A[f].im = 0;
-                A[f].re = 0;
-                for (int t = 0; t < len; t++)
+                byte* a = (byte*)b;
+                for (int f = 0; f < data; f++)
                 {
-                    A[f].re += S[t] * Math.Cos(2 * Math.PI * t * f / len);
-                    A[f].im -= S[t] * Math.Sin(2 * Math.PI * t * f / len);
+                    A[f].im = 0;
+                    A[f].re = 0;
+                    for (int t = 0; t < data; t++)
+                    {
+                        A[f].re += a[t] * Math.Cos(2 * Math.PI * t * f / data);
+                        A[f].im -= a[t] * Math.Sin(2 * Math.PI * t * f / data);
+                    }
+                    A[f].re /= data;
+                    A[f].im /= data;
                 }
-                A[f].re /= len;
-                A[f].im /= len;
             }
-            return A[len];
+            return A[data];
         }
 
         public void IDFT(Complex[] A)
