@@ -35,6 +35,11 @@ namespace WindowsFormsApp
         {
             BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open));
             waveHeader.reset();
+            if (byteArray != null)
+            {
+                Array.Clear(byteArray, 0, byteArray.Length);
+                Array.Clear(doubleArray, 0, doubleArray.Length);
+            }
             waveHeader.chunkID = reader.ReadInt32();
             waveHeader.chunkSize = reader.ReadInt32();
             waveHeader.format = reader.ReadInt32();
@@ -60,14 +65,19 @@ namespace WindowsFormsApp
             doubleArray = shortArray.Select(x => (double)x).ToArray();
         }
 
+
         public void displayWave()
         {
             ChartArea CA = chart1.ChartAreas[0];  // quick reference
-            CA.AxisX.ScaleView.Zoomable = true;
-            //CA.CursorX.AutoScroll = true;
-            CA.CursorX.IsUserSelectionEnabled = true;
 
+            CA.CursorX.IsUserSelectionEnabled = true;
+            CA.AxisX.ScaleView.Zoomable = false;
+
+            //CA.CursorX.AutoScroll = false;
             //CA.AxisX.Interval = 10;
+
+            Console.WriteLine("whfs");
+
             for (int i = 0; i < doubleArray.Length; i++)
             {
                 chart1.Series[0].Points.Add(doubleArray[i]);
@@ -95,6 +105,7 @@ namespace WindowsFormsApp
 
         private void openWaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "Wave File ((.wav)|*.wav;";
             if (open.ShowDialog() != DialogResult.OK) return;
