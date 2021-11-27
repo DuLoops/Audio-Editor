@@ -13,7 +13,13 @@ using System.Windows.Forms.DataVisualization.Charting;
 
 namespace WindowsFormsApp
 {
-    public partial class Form1 : Form
+    public struct Complex
+    {
+        public double re;
+        public double im;
+    }
+
+    public unsafe partial class Form1 : Form
     {
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern int record();
@@ -28,6 +34,7 @@ namespace WindowsFormsApp
         public static extern uint getBufferLen();
 
         WaveHeader waveHeader = new WaveHeader();
+
         byte[] byteArray;
         double[] doubleArray;
 
@@ -66,6 +73,48 @@ namespace WindowsFormsApp
 
         }
 
+
+        public Complex DFT()
+        {
+            IntPtr b = getBuffer();
+            uint data = getBufferLen();
+
+            Complex[] A = new Complex[data];
+
+            unsafe
+            {
+                byte* a = (byte*)b;
+                for (int f = 0; f < data; f++)
+                {
+                    A[f].im = 0;
+                    A[f].re = 0;
+                    for (int t = 0; t < data; t++)
+                    {
+                        A[f].re += a[t] * Math.Cos(2 * Math.PI * t * f / data);
+                        A[f].im -= a[t] * Math.Sin(2 * Math.PI * t * f / data);
+                    }
+                    A[f].re /= data;
+                    A[f].im /= data;
+                }
+            }
+            return A[data];
+        }
+
+        public void IDFT(Complex[] A)
+        {
+            int len = A.Length;
+            double[] S = new double[len];
+
+            for (int t = 0; t < len; t++)
+            {
+                S[t] = 0;
+                for (int f = 0; f < len; f++)
+                {
+                    S[t] += A[f].re * Math.Cos(2 * Math.PI * f * t / len) - A[f].im * Math.Sin(2 * Math.PI * f * t / len);
+                }
+            }
+            doubleArray = S;
+        }
 
         public void displayWave()
         {
@@ -127,6 +176,12 @@ namespace WindowsFormsApp
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
 
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.Show();
         }
     }
 }
