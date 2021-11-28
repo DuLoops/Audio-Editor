@@ -27,8 +27,8 @@ namespace WindowsFormsApp
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr getBuffer();
 
-        [DllImport("DLL.dll", CharSet = CharSet.Auto)]
-        public static extern void setBuffer(IntPtr ptr);
+        [DllImport("DLL.dll", CallingConvention = CallingConvention.Cdecl ,CharSet = CharSet.Auto)]
+        public static extern void setSaveBuffer(byte* ptr, int len);
 
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern uint getBufferLen();
@@ -69,10 +69,14 @@ namespace WindowsFormsApp
                 shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
             }
             doubleArray = shortArray.Select(x => (double)x).ToArray();
-
+            //setBuffer((IntPtr)byteArray);
+ 
+            fixed (byte* byteP = byteArray)
+            {
+                setSaveBuffer(byteP, byteArray.Length);
+            }
 
         }
-
 
         public Complex DFT()
         {
@@ -116,30 +120,85 @@ namespace WindowsFormsApp
             doubleArray = S;
         }
 
+        public void styleChart()
+        {
+            ChartArea ca = chart1.ChartAreas[0];  // quick reference
+
+            ca.CursorX.IsUserEnabled = true;
+            ca.CursorX.IsUserSelectionEnabled = true;
+            ca.CursorX.AutoScroll = true;
+            ca.CursorX.AutoScroll = false;
+            ca.AxisX.ScaleView.Zoomable = false;
+            ca.AxisX.ScrollBar.Enabled = true;
+            ca.AxisX.Minimum = 0;
+            ca.AxisX.Maximum = Double.NaN;
+            this.chart1.MouseWheel += chart1_MouseWheel;
+        }
+
         public void displayWave()
         {
-            ChartArea CA = chart1.ChartAreas[0];  // quick reference
-
-            CA.CursorX.IsUserSelectionEnabled = true;
-            CA.AxisX.ScaleView.Zoomable = false;
-
-            //CA.CursorX.AutoScroll = false;
-            //CA.AxisX.Interval = 10;
-
-            Console.WriteLine("whfs");
 
             for (int i = 0; i < doubleArray.Length; i++)
             {
                 chart1.Series[0].Points.Add(doubleArray[i]);
             }
-            CA.CursorX.Interval = 100;
 
-            //selectionstat
+        }
+
+        private class ZoomFrame
+        {
+            public double XStart { get; set; }
+            public double XFinish { get; set; }
+            public double YStart { get; set; }
+            public double YFinish { get; set; }
+        }
+
+        private readonly Stack<ZoomFrame> _zoomFrames = new Stack<ZoomFrame>();
+        private void chart1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            var chart = (Chart)sender;
+            var xAxis = chart.ChartAreas[0].AxisX;
+            var yAxis = chart.ChartAreas[0].AxisY;
+
+            try
+            {
+                if (e.Delta < 0)
+                {
+                    if (0 < _zoomFrames.Count)
+                    {
+                        var frame = _zoomFrames.Pop();
+                        if (_zoomFrames.Count == 0)
+                        {
+                            xAxis.ScaleView.ZoomReset();
+                        }
+                        else
+                        {
+                            xAxis.ScaleView.Zoom(frame.XStart, frame.XFinish);
+                        }
+                    }
+                }
+                else if (e.Delta > 0)
+                {
+                    var xMin = xAxis.ScaleView.ViewMinimum;
+                    var xMax = xAxis.ScaleView.ViewMaximum;
+
+
+                    _zoomFrames.Push(new ZoomFrame { XStart = xMin, XFinish = xMax});
+
+                    var posXStart = xAxis.PixelPositionToValue(e.Location.X) - (xMax - xMin) / 4;
+                    var posXFinish = xAxis.PixelPositionToValue(e.Location.X) + (xMax - xMin) / 4;
+
+
+                    xAxis.ScaleView.Zoom(posXStart, posXFinish);
+                }
+            }
+            catch { }
         }
 
         public Form1()
         {
             InitializeComponent();
+            styleChart();
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -173,15 +232,41 @@ namespace WindowsFormsApp
 
         }
 
+
         private void hScrollBar1_Scroll(object sender, ScrollEventArgs e)
         {
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void dft_click(object sender, EventArgs e)
         {
             Form2 form2 = new Form2();
             form2.Show();
+        }
+
+        private void play_click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pause_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void copy_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Paste_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Cut_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

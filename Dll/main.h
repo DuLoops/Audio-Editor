@@ -11,4 +11,4 @@ EXPORT PBYTE getBuffer();
 
 EXPORT DWORD getBufferLen();
 
-EXPORT void setBuffer(PBYTE newBuffer);
+EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len);

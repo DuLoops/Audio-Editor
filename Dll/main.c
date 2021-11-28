@@ -38,9 +38,16 @@ EXPORT DWORD getBufferLen() {
     return dwDataLength;
 }
 
-EXPORT void setBuffer(PBYTE newBuffer) {
-    pSaveBuffer = newBuffer;
+EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len) {
+    dwDataLength = len;
+    PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
+    memcpy(tempBuffer, newbuffer, dwDataLength);
+    pSaveBuffer = tempBuffer;
 }
+
+//EXPORT void setBuffer(PBYTE newBuffer) {
+//    pSaveBuffer = newBuffer;
+//}
 
 
 EXPORT int CALLBACK record()
@@ -66,7 +73,7 @@ void ReverseMemory(BYTE* pBuffer, int iLength)
         pBuffer[iLength - i - 1] = b;
     }
 }
-
+ 
 BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static BOOL         bRecording, bPlaying, bReverse, bPaused,
@@ -162,6 +169,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             bEnding = TRUE;
             waveInReset(hWaveIn);
+
             return TRUE;
 
         case IDC_PLAY_BEG:
