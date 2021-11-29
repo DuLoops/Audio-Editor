@@ -33,6 +33,9 @@ namespace WindowsFormsApp
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern uint getBufferLen();
 
+        [DllImport("DLL.dll", CharSet = CharSet.Auto)]
+        public static extern void play();
+
         WaveHeader waveHeader = new WaveHeader();
 
         byte[] byteArray;
@@ -74,6 +77,16 @@ namespace WindowsFormsApp
             fixed (byte* byteP = byteArray)
             {
                 setSaveBuffer(byteP, byteArray.Length);
+            }
+
+        }
+
+        public void displayWave()
+        {
+
+            for (int i = 0; i < doubleArray.Length; i++)
+            {
+                chart1.Series[0].Points.Add(doubleArray[i]);
             }
 
         }
@@ -135,15 +148,6 @@ namespace WindowsFormsApp
             this.chart1.MouseWheel += chart1_MouseWheel;
         }
 
-        public void displayWave()
-        {
-
-            for (int i = 0; i < doubleArray.Length; i++)
-            {
-                chart1.Series[0].Points.Add(doubleArray[i]);
-            }
-
-        }
 
         private class ZoomFrame
         {
@@ -208,8 +212,10 @@ namespace WindowsFormsApp
 
         private void recordToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            record();
-
+            unsafe
+            {
+                record();
+            }
         }
 
         private void openWaveToolStripMenuItem_Click(object sender, EventArgs e)
@@ -246,11 +252,41 @@ namespace WindowsFormsApp
 
         private void play_click(object sender, EventArgs e)
         {
+            unsafe
+            {
+                play();
 
+            }
         }
 
         private void pause_Click(object sender, EventArgs e)
         {
+
+            IntPtr bufferP = getBuffer();
+            uint bufferLen = getBufferLen();
+            if(byteArray != null)
+            {
+                Array.Clear(byteArray, 0, byteArray.Length);
+                Array.Clear(doubleArray, 0, doubleArray.Length);
+            }
+
+            unsafe
+            {
+                byte* bPointer = (byte*)bufferP;
+                for (int i = 0; i < bufferLen; i++)
+                {
+                    byteArray[i] = bPointer[i];
+                }
+            }
+            short[] shortArray = new short[waveHeader.subchunk2Size / waveHeader.blockAligh];
+
+            for (int i = 0; i < shortArray.Length; i++)
+            {
+                shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
+            }
+            doubleArray = shortArray.Select(x => (double)x).ToArray();
+
+            displayWave();
 
         }
 

@@ -12,3 +12,5 @@ EXPORT PBYTE getBuffer();
 EXPORT DWORD getBufferLen();
 
 EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len);
+
+EXPORT void play();

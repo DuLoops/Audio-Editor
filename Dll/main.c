@@ -49,6 +49,11 @@ EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len) {
 //    pSaveBuffer = newBuffer;
 //}
 
+EXPORT void play() {
+    DlgProc(hInst, IDC_PLAY_BEG, NULL, NULL);
+    //SendMessage(hInst, WM_COMMAND, IDC_PLAY_BEG, 0);
+}
+
 
 EXPORT int CALLBACK record()
 {
@@ -86,6 +91,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     static TCHAR        szOpenError[] = TEXT("Error opening waveform audio!");
     static TCHAR        szMemError[] = TEXT("Error allocating memory!");
     static WAVEFORMATEX waveform;
+    EnableWindow(GetDlgItem(hwnd, IDC_PLAY_BEG), TRUE); ///////
 
     switch (message)
     {
@@ -269,7 +275,16 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         EnableWindow(GetDlgItem(hwnd, IDC_PLAY_REV), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_PLAY_REP), FALSE);
         EnableWindow(GetDlgItem(hwnd, IDC_PLAY_SPEED), FALSE);
-        SetFocus(GetDlgItem(hwnd, IDC_RECORD_END));
+        //EnableWindow(GetDlgItem(hwnd, IDC_RECORD_BEG), TRUE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_RECORD_END), TRUE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_BEG), FALSE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_PAUSE), FALSE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_END), FALSE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_REV), FALSE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_REP), FALSE);
+        //EnableWindow(GetDlgItem(hwnd, IDC_PLAY_SPEED), FALSE);
+        //SetFocus(GetDlgItem(hwnd, IDC_RECORD_END));
+        //SetFocus(GetDlgItem(hwnd, IDC_RECORD_END));
 
         // Add the buffers
 
