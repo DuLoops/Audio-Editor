@@ -91,7 +91,7 @@ namespace WindowsFormsApp
 
         }
 
-        public Complex DFT()
+        public void DFT()
         {
             IntPtr b = getBuffer();
             uint data = getBufferLen();
@@ -114,7 +114,6 @@ namespace WindowsFormsApp
                     A[f].im /= data;
                 }
             }
-            return A[data];
         }
 
         public void IDFT(Complex[] A)
@@ -292,7 +291,6 @@ namespace WindowsFormsApp
 
         private void copy_Click(object sender, EventArgs e)
         {
-
         }
 
         private void Paste_Click(object sender, EventArgs e)
