@@ -44,6 +44,7 @@ namespace WindowsFormsApp
             this.Cut = new System.Windows.Forms.Button();
             this.Paste = new System.Windows.Forms.Button();
             this.copy = new System.Windows.Forms.Button();
+            this.loadRecoredAudioToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -55,17 +56,18 @@ namespace WindowsFormsApp
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recordToolStripMenuItem,
+            this.loadRecoredAudioToolStripMenuItem,
             this.importToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1627, 36);
+            this.menuStrip1.Size = new System.Drawing.Size(1627, 33);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // recordToolStripMenuItem
             // 
             this.recordToolStripMenuItem.Name = "recordToolStripMenuItem";
-            this.recordToolStripMenuItem.Size = new System.Drawing.Size(83, 32);
+            this.recordToolStripMenuItem.Size = new System.Drawing.Size(83, 29);
             this.recordToolStripMenuItem.Text = "Record";
             this.recordToolStripMenuItem.Click += new System.EventHandler(this.recordToolStripMenuItem_Click);
             // 
@@ -74,7 +76,7 @@ namespace WindowsFormsApp
             this.importToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openWaveToolStripMenuItem});
             this.importToolStripMenuItem.Name = "importToolStripMenuItem";
-            this.importToolStripMenuItem.Size = new System.Drawing.Size(83, 32);
+            this.importToolStripMenuItem.Size = new System.Drawing.Size(83, 29);
             this.importToolStripMenuItem.Text = "Import";
             // 
             // openWaveToolStripMenuItem
@@ -176,6 +178,13 @@ namespace WindowsFormsApp
             this.copy.UseVisualStyleBackColor = true;
             this.copy.Click += new System.EventHandler(this.copy_Click);
             // 
+            // loadRecoredAudioToolStripMenuItem
+            // 
+            this.loadRecoredAudioToolStripMenuItem.Name = "loadRecoredAudioToolStripMenuItem";
+            this.loadRecoredAudioToolStripMenuItem.Size = new System.Drawing.Size(189, 29);
+            this.loadRecoredAudioToolStripMenuItem.Text = "Load Recored Audio";
+            this.loadRecoredAudioToolStripMenuItem.Click += new System.EventHandler(this.loadRecoredAudioToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -214,6 +223,7 @@ namespace WindowsFormsApp
         private System.Windows.Forms.Button Cut;
         private System.Windows.Forms.Button Paste;
         private System.Windows.Forms.Button copy;
+        private System.Windows.Forms.ToolStripMenuItem loadRecoredAudioToolStripMenuItem;
     }
 }
 

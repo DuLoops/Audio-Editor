@@ -28,7 +28,7 @@ namespace WindowsFormsApp
         public static extern IntPtr getBuffer();
 
         [DllImport("DLL.dll", CallingConvention = CallingConvention.Cdecl ,CharSet = CharSet.Auto)]
-        public static extern void setSaveBuffer(byte* ptr, int len);
+        public static extern void setSaveBuffer(byte* ptr, int dLen, int sps, int bps, int nBlock, int wbps);
 
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern uint getBufferLen();
@@ -76,14 +76,14 @@ namespace WindowsFormsApp
  
             fixed (byte* byteP = byteArray)
             {
-                setSaveBuffer(byteP, byteArray.Length);
+                setSaveBuffer(byteP, byteArray.Length, waveHeader.sampleRate, waveHeader.byteRate, waveHeader.blockAligh, waveHeader.bps);
             }
 
         }
 
         public void displayWave()
         {
-
+            chart1.Series[0].Points.Clear();
             for (int i = 0; i < doubleArray.Length; i++)
             {
                 chart1.Series[0].Points.Add(doubleArray[i]);
@@ -262,31 +262,6 @@ namespace WindowsFormsApp
         private void pause_Click(object sender, EventArgs e)
         {
 
-            IntPtr bufferP = getBuffer();
-            uint bufferLen = getBufferLen();
-            if(byteArray != null)
-            {
-                Array.Clear(byteArray, 0, byteArray.Length);
-                Array.Clear(doubleArray, 0, doubleArray.Length);
-            }
-
-            unsafe
-            {
-                byte* bPointer = (byte*)bufferP;
-                for (int i = 0; i < bufferLen; i++)
-                {
-                    byteArray[i] = bPointer[i];
-                }
-            }
-            short[] shortArray = new short[waveHeader.subchunk2Size / waveHeader.blockAligh];
-
-            for (int i = 0; i < shortArray.Length; i++)
-            {
-                shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
-            }
-            doubleArray = shortArray.Select(x => (double)x).ToArray();
-
-            displayWave();
 
         }
 
@@ -303,6 +278,33 @@ namespace WindowsFormsApp
         private void Cut_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void loadRecoredAudioToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IntPtr bufferP = getBuffer();
+            uint bufferLen = getBufferLen();
+            if (byteArray != null)
+            {
+                Array.Clear(byteArray, 0, byteArray.Length);
+                Array.Clear(doubleArray, 0, doubleArray.Length);
+            }
+            byteArray = new byte[bufferLen];
+
+            unsafe
+            {
+                byte* bPointer = (byte*)bufferP;
+                for (int i = 0; i < bufferLen; i++)
+                {
+                    byteArray[i] = bPointer[i];
+                }
+            }
+
+            short[] sdata = new short[(int)Math.Ceiling((double)byteArray.Length / 2)];
+            Buffer.BlockCopy(byteArray, 0, sdata, 0, byteArray.Length);
+            doubleArray = sdata.Select(x => (double)x).ToArray();
+
+            displayWave();
         }
     }
 }

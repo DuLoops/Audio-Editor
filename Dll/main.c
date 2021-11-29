@@ -20,7 +20,12 @@
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 static HINSTANCE hInst;
 static PBYTE pSaveBuffer;
-static DWORD  dwDataLength;
+static DWORD dwDataLength; 
+static DWORD nSamplesPerSec;
+static DWORD nAvgBytesPerSec;
+static DWORD nBlockAlign;
+static DWORD wBitsPerSample;
+static boolean isRecorded = TRUE;
 
 TCHAR szAppName[] = TEXT("Record1");
 
@@ -38,11 +43,16 @@ EXPORT DWORD getBufferLen() {
     return dwDataLength;
 }
 
-EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len) {
-    dwDataLength = len;
+EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD dLen, DWORD sps, DWORD bps, DWORD nBlock, DWORD wbps) {
+    dwDataLength = dLen;
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
     memcpy(tempBuffer, newbuffer, dwDataLength);
     pSaveBuffer = tempBuffer;
+    nSamplesPerSec = sps;
+    nAvgBytesPerSec = bps;
+    nBlockAlign = nBlock;
+    wBitsPerSample = wbps;
+    isRecorded = FALSE;
 }
 
 //EXPORT void setBuffer(PBYTE newBuffer) {
@@ -123,17 +133,17 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 MessageBeep(MB_ICONEXCLAMATION);
                 MessageBox(hwnd, szMemError, szAppName,
                     MB_ICONEXCLAMATION | MB_OK);
+                isRecorded = TRUE;
                 return TRUE;
             }
 
             // Open waveform audio for input
-
             waveform.wFormatTag = WAVE_FORMAT_PCM;
             waveform.nChannels = 1;
-            waveform.nSamplesPerSec = 11025;
-            waveform.nAvgBytesPerSec = 11025;
-            waveform.nBlockAlign = 1;
-            waveform.wBitsPerSample = 8;
+            waveform.nSamplesPerSec = 44100;
+            waveform.nAvgBytesPerSec = 88200;
+            waveform.nBlockAlign = 2;
+            waveform.wBitsPerSample = 16;
             waveform.cbSize = 0;
 
             if (waveInOpen(&hWaveIn, WAVE_MAPPER, &waveform,
@@ -181,13 +191,27 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         case IDC_PLAY_BEG:
             // Open waveform audio for output
 
-            waveform.wFormatTag = WAVE_FORMAT_PCM;
-            waveform.nChannels = 1;
-            waveform.nSamplesPerSec = 11025;
-            waveform.nAvgBytesPerSec = 11025;
-            waveform.nBlockAlign = 1;
-            waveform.wBitsPerSample = 8;
-            waveform.cbSize = 0;
+            if (isRecorded) {
+                waveform.wFormatTag = WAVE_FORMAT_PCM;
+                waveform.nChannels = 1;
+                waveform.nSamplesPerSec = 44100;
+                waveform.nAvgBytesPerSec = 88200;
+                waveform.nBlockAlign = 2;
+                waveform.wBitsPerSample = 16;
+                waveform.cbSize = 0;
+
+            }
+            else {
+                waveform.wFormatTag = WAVE_FORMAT_PCM;
+                waveform.nChannels = 1;
+                waveform.nSamplesPerSec = nSamplesPerSec;
+                waveform.nAvgBytesPerSec = nAvgBytesPerSec;
+                waveform.nBlockAlign = nBlockAlign;
+                waveform.wBitsPerSample = wBitsPerSample;
+                waveform.cbSize = 0;
+            }
+
+\
 
             if (waveOutOpen(&hWaveOut, WAVE_MAPPER, &waveform,
                 (DWORD)hwnd, 0, CALLBACK_WINDOW))
