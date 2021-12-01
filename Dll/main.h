@@ -5,12 +5,22 @@
 #define EXPORT __declspec (dllexport)
 #endif
 
-EXPORT int CALLBACK record();
+EXPORT int CALLBACK start();
 
 EXPORT PBYTE getBuffer();
 
 EXPORT DWORD getBufferLen();
 
-EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD len);
+EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD dLen, DWORD sps, DWORD bps, DWORD nBlock, DWORD wbps);
 
 EXPORT void play();
+
+EXPORT void record();
+
+EXPORT void end();
+
+EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen);
+
+EXPORT void pause();
+
+EXPORT DWORD getSampleRate();
