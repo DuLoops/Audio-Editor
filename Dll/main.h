@@ -11,7 +11,7 @@ EXPORT PBYTE getBuffer();
 
 EXPORT DWORD getBufferLen();
 
-EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD dLen, DWORD sps, DWORD bps, DWORD nBlock, DWORD wbps);
+EXPORT void setSaveBuffer(PBYTE newbuffer, long dLen, long _nSamplesPerSec, long _nAvgBytesPerSec, long _nBlockAlign, long _wBitsPerSample);
 
 EXPORT void play();
 
@@ -24,3 +24,5 @@ EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen);
 EXPORT void pause();
 
 EXPORT DWORD getSampleRate();
+
+EXPORT void setHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample);
