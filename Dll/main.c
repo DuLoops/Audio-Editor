@@ -26,6 +26,7 @@ static DWORD nAvgBytesPerSec;
 static DWORD nBlockAlign;
 static DWORD wBitsPerSample;
 static boolean isRecorded = TRUE;
+static HWND dlghnd;
 
 TCHAR szAppName[] = TEXT("Record1");
 
@@ -55,23 +56,45 @@ EXPORT void setSaveBuffer(PBYTE newbuffer, DWORD dLen, DWORD sps, DWORD bps, DWO
     isRecorded = FALSE;
 }
 
-//EXPORT void setBuffer(PBYTE newBuffer) {
-//    pSaveBuffer = newBuffer;
-//}
-
-EXPORT void play() {
-    DlgProc(hInst, IDC_PLAY_BEG, NULL, NULL);
-    //SendMessage(hInst, WM_COMMAND, IDC_PLAY_BEG, 0);
+EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen) {
+    dwDataLength = dLen;
+    PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
+    memcpy(tempBuffer, newbuffer, dwDataLength);
+    pSaveBuffer = tempBuffer;
 }
 
+EXPORT void play() {
+    SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_BEG, 0), 0);
+}
+EXPORT void record() {
+    SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_BEG, 0), 0);
+}
+EXPORT void end() {
+    SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_END, 0), 0);
+}
+EXPORT void pause() {
+    SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_PAUSE, 0), 0);
+}
 
-EXPORT int CALLBACK record()
+DWORD WINAPI messageThreadFunc(PVOID pParam) {
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    return 0;
+}
+
+EXPORT int CALLBACK start()
 {
-    if (-1 == DialogBox(hInst, TEXT("Record"), NULL, DlgProc))
+    dlghnd = CreateDialog(hInst, TEXT("Record"), NULL, DlgProc);
+    if (-1 == dlghnd)
     {
         MessageBox(NULL, TEXT("This program requires Windows NT!"),
             szAppName, MB_ICONERROR);
     }
+    DWORD thrdMsg;
+    CreateThread(NULL, 0, messageThreadFunc, NULL, NULL, &thrdMsg);
     return 0;
 }
 
