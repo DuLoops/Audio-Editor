@@ -29,10 +29,10 @@ namespace WindowsFormsApp
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series7 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series8 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.importToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openWaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +50,10 @@ namespace WindowsFormsApp
             this.recordedRadio = new System.Windows.Forms.CheckBox();
             this.importedRadio = new System.Windows.Forms.CheckBox();
             this.chartRecorded = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.directoryEntry1 = new System.DirectoryServices.DirectoryEntry();
+            this.directoryEntry2 = new System.DirectoryServices.DirectoryEntry();
+            this.directoryEntry3 = new System.DirectoryServices.DirectoryEntry();
+            this.directorySearcher1 = new System.DirectoryServices.DirectorySearcher();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -89,19 +93,20 @@ namespace WindowsFormsApp
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             this.exportToolStripMenuItem.Size = new System.Drawing.Size(79, 29);
             this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
             // chart1
             // 
             this.chart1.BackColor = System.Drawing.Color.Chocolate;
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
+            chartArea7.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea7);
             this.chart1.Location = new System.Drawing.Point(81, 585);
             this.chart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series7.ChartArea = "ChartArea1";
+            series7.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series7.Name = "Series1";
+            this.chart1.Series.Add(series7);
             this.chart1.Size = new System.Drawing.Size(1400, 350);
             this.chart1.TabIndex = 2;
             this.chart1.Text = "chart1";
@@ -245,18 +250,24 @@ namespace WindowsFormsApp
             // chartRecorded
             // 
             this.chartRecorded.BackColor = System.Drawing.Color.DarkSalmon;
-            chartArea2.Name = "ChartArea1";
-            this.chartRecorded.ChartAreas.Add(chartArea2);
+            chartArea8.Name = "ChartArea1";
+            this.chartRecorded.ChartAreas.Add(chartArea8);
             this.chartRecorded.Location = new System.Drawing.Point(81, 227);
             this.chartRecorded.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chartRecorded.Name = "chartRecorded";
-            series2.ChartArea = "ChartArea1";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Name = "Series1";
-            this.chartRecorded.Series.Add(series2);
+            series8.ChartArea = "ChartArea1";
+            series8.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series8.Name = "Series1";
+            this.chartRecorded.Series.Add(series8);
             this.chartRecorded.Size = new System.Drawing.Size(1400, 350);
             this.chartRecorded.TabIndex = 16;
             this.chartRecorded.Text = "chart2";
+            // 
+            // directorySearcher1
+            // 
+            this.directorySearcher1.ClientTimeout = System.TimeSpan.Parse("-00:00:01");
+            this.directorySearcher1.ServerPageTimeLimit = System.TimeSpan.Parse("-00:00:01");
+            this.directorySearcher1.ServerTimeLimit = System.TimeSpan.Parse("-00:00:01");
             // 
             // Form1
             // 
@@ -308,6 +319,10 @@ namespace WindowsFormsApp
         private System.Windows.Forms.CheckBox recordedRadio;
         private System.Windows.Forms.CheckBox importedRadio;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartRecorded;
+        private System.DirectoryServices.DirectoryEntry directoryEntry1;
+        private System.DirectoryServices.DirectoryEntry directoryEntry2;
+        private System.DirectoryServices.DirectoryEntry directoryEntry3;
+        private System.DirectoryServices.DirectorySearcher directorySearcher1;
     }
 }
 

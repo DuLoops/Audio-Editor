@@ -29,15 +29,15 @@ namespace WindowsFormsApp
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.dftChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.saveBtn = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.nVal = new System.Windows.Forms.NumericUpDown();
             this.lowfilter = new System.Windows.Forms.RadioButton();
             this.highfilter = new System.Windows.Forms.RadioButton();
             this.filter = new System.Windows.Forms.Button();
-            this.nVal = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.dftChart)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nVal)).BeginInit();
@@ -45,15 +45,15 @@ namespace WindowsFormsApp
             // 
             // dftChart
             // 
-            chartArea4.Name = "ChartArea1";
-            this.dftChart.ChartAreas.Add(chartArea4);
+            chartArea1.Name = "ChartArea1";
+            this.dftChart.ChartAreas.Add(chartArea1);
             this.dftChart.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.dftChart.Location = new System.Drawing.Point(12, 144);
             this.dftChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dftChart.Name = "dftChart";
-            series4.ChartArea = "ChartArea1";
-            series4.Name = "Series1";
-            this.dftChart.Series.Add(series4);
+            series1.ChartArea = "ChartArea1";
+            series1.Name = "Series1";
+            this.dftChart.Series.Add(series1);
             this.dftChart.Size = new System.Drawing.Size(834, 459);
             this.dftChart.TabIndex = 0;
             this.dftChart.Text = "chart1";
@@ -81,6 +81,14 @@ namespace WindowsFormsApp
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Filter";
+            // 
+            // nVal
+            // 
+            this.nVal.Location = new System.Drawing.Point(165, 25);
+            this.nVal.Name = "nVal";
+            this.nVal.Size = new System.Drawing.Size(108, 26);
+            this.nVal.TabIndex = 3;
+            this.nVal.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // lowfilter
             // 
@@ -115,14 +123,6 @@ namespace WindowsFormsApp
             this.filter.UseVisualStyleBackColor = true;
             this.filter.Click += new System.EventHandler(this.lowBtn_Click);
             // 
-            // nVal
-            // 
-            this.nVal.Location = new System.Drawing.Point(165, 25);
-            this.nVal.Name = "nVal";
-            this.nVal.Size = new System.Drawing.Size(108, 26);
-            this.nVal.TabIndex = 3;
-            this.nVal.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
-            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
@@ -133,7 +133,7 @@ namespace WindowsFormsApp
             this.Controls.Add(this.dftChart);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Form2";
-            this.Text = "Form2";
+            this.Text = "DFT";
             this.Load += new System.EventHandler(this.Form2_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dftChart)).EndInit();
             this.groupBox1.ResumeLayout(false);
