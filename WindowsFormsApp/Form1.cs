@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;//needed to perform P/Invoke - win32 calls
 using System.IO;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Diagnostics;
+using System.Threading;
 
 namespace WindowsFormsApp
 {
@@ -94,6 +95,8 @@ namespace WindowsFormsApp
         byte[] byteArrayRecorded;
         double[] doubleArrayRecorded;
         double[] doubleArrayCopy;
+        private static readonly Object obj = new Object();
+
 
         public void readHeader(string filename)
         {
@@ -152,11 +155,16 @@ namespace WindowsFormsApp
 
         public Complex[] DFT()
         {
-            long start =  userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
-            long end = userSelectionEnd = (long)chartRecorded.ChartAreas[0].CursorX.SelectionEnd;
-            if (end > doubleArrayRecorded.Length)
+            long start =  (long)chart1.ChartAreas[0].CursorX.SelectionStart;
+            long end = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
+            if (end < start)
             {
-                end = doubleArrayRecorded.Length - 1;
+                MessageBox.Show("Select values");
+                return null;
+            }
+            if (end > doubleArrayImport.Length)
+            {
+                end = doubleArrayImport.Length - 1;
             }
 
             int dftLen = (int)(end - start);
@@ -168,14 +176,87 @@ namespace WindowsFormsApp
                 cArray[f].re = 0;
                 for (int t = 0; t < dftLen; t++)
                 {
-                    cArray[f].re += byteArrayRecorded[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
-                    cArray[f].im -= byteArrayRecorded[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
+                    cArray[f].re += byteArrayImport[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
+                    cArray[f].im -= byteArrayImport[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
                 }
                 cArray[f].re /= dftLen;
                 cArray[f].im /= dftLen;
             }
-            
+
             return cArray;
+        }
+
+        int numThread = 4;
+
+        public Complex[] DFTthreading(int setThread)
+        {   
+            
+            long start = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
+            long end = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArrayImport.Length)
+            {
+                end = doubleArrayImport.Length - 1;
+            }
+            int dftLen = (int)(end - start);
+            Complex[] cArray = new Complex[dftLen];
+            numThread = 6;
+            Thread[] t = new Thread[numThread];
+            Mutex mutex = new Mutex();
+
+            t[0] = new Thread(() => DFTthreadProc(cArray, 0, dftLen));
+            t[1] = new Thread(() => DFTthreadProc(cArray, 1, dftLen));
+            t[2] = new Thread(() => DFTthreadProc(cArray, 2, dftLen));
+            t[3] = new Thread(() => DFTthreadProc(cArray, 3, dftLen));
+            t[4] = new Thread(() => DFTthreadProc(cArray, 4, dftLen));
+            t[5] = new Thread(() => DFTthreadProc(cArray, 5, dftLen));
+            t[0].Start();
+            t[1].Start();
+            t[2].Start();
+            t[3].Start();
+            t[4].Start();
+            t[5].Start();
+            t[0].Join();
+            t[1].Join();
+            t[2].Join();
+            t[3].Join();
+            t[4].Join();
+            t[5].Join();
+
+
+
+            return cArray;
+        }
+
+
+        public  void DFTthreadProc(Complex[] cArray, int threadCount, int dftLen) {
+
+            int chunk = (dftLen / numThread);
+            Trace.WriteLine("Thread Proc count: "+ threadCount);
+            for (int f = threadCount * chunk; f < ((threadCount + 1) * chunk) - 1; f++)
+            { 
+
+                cArray[f].im = 0;
+                cArray[f].re = 0;
+                for (int t = 0; t < dftLen; t++)
+                {
+                    cArray[f].re += byteArrayImport[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
+                    cArray[f].im -= byteArrayImport[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
+
+                }
+                cArray[f].im /= dftLen;
+                cArray[f].re /= dftLen;
+            }
+        }
+
+        public void binCalc(Complex[] cArray, int f, int dftLen)
+        {
+            for (int t = 0; t < dftLen; t++)
+            {
+                cArray[f].re += byteArrayImport[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
+                cArray[f].im -= byteArrayImport[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
+
+            }
+        
         }
 
         public byte[] windowing()
@@ -620,15 +701,41 @@ namespace WindowsFormsApp
             windowForm.Show();
         }
 
+        private void benchmark_Click(object sender, EventArgs e)
+        {
+            Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
+            Thread.CurrentThread.Priority = ThreadPriority.Highest;
+            var watch = new Stopwatch();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            watch.Start();
+            DFT();
+            watch.Stop();
+            var dftTime = watch.Elapsed.TotalMilliseconds;
+            watch = new Stopwatch();
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            watch.Start();
+            DFTthreading(10);
+            watch.Stop();
+            var threadingTime = watch.Elapsed.TotalMilliseconds;
+
+
+            MessageBox.Show((string)"Regular: " + dftTime + "\nThreading: " + threadingTime);
+
+        }
 
         private void dft_click(object sender, EventArgs e)
         {
-            if (chartRecorded.ChartAreas[0].CursorX.SelectionEnd == chartRecorded.ChartAreas[0].CursorX.SelectionStart ||  double.IsNaN(chartRecorded.ChartAreas[0].CursorX.SelectionEnd))
+            if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart ||  double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
             {
                 MessageBox.Show("Select values first");
                 return;
             }
-            Complex[] dft = DFT();
+            Complex[] dft = DFTthreading(10);
             Form2 dftForm = new Form2(dft, dft.Length, RgetSampleRate());
 
             dftForm.displayDFT();

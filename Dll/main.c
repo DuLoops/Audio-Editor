@@ -246,8 +246,6 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             }
 
-\
-
             if (waveOutOpen(&hWaveOut, WAVE_MAPPER, &waveform,
                 (DWORD)hwnd, 0, CALLBACK_WINDOW))
             {

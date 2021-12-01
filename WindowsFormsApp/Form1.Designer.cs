@@ -55,6 +55,7 @@ namespace WindowsFormsApp
             this.directoryEntry3 = new System.DirectoryServices.DirectoryEntry();
             this.directorySearcher1 = new System.DirectoryServices.DirectorySearcher();
             this.windowBtn = new System.Windows.Forms.Button();
+            this.benchmark = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -282,12 +283,23 @@ namespace WindowsFormsApp
             this.windowBtn.UseVisualStyleBackColor = false;
             this.windowBtn.Click += new System.EventHandler(this.window_click);
             // 
+            // benchmark
+            // 
+            this.benchmark.Location = new System.Drawing.Point(452, 157);
+            this.benchmark.Name = "benchmark";
+            this.benchmark.Size = new System.Drawing.Size(111, 38);
+            this.benchmark.TabIndex = 18;
+            this.benchmark.Text = "Bencmark DFT";
+            this.benchmark.UseVisualStyleBackColor = true;
+            this.benchmark.Click += new System.EventHandler(this.benchmark_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.AppWorkspace;
             this.ClientSize = new System.Drawing.Size(1519, 948);
+            this.Controls.Add(this.benchmark);
             this.Controls.Add(this.windowBtn);
             this.Controls.Add(this.recordedRadio);
             this.Controls.Add(this.chartRecorded);
@@ -339,6 +351,7 @@ namespace WindowsFormsApp
         private System.DirectoryServices.DirectoryEntry directoryEntry3;
         private System.DirectoryServices.DirectorySearcher directorySearcher1;
         private System.Windows.Forms.Button windowBtn;
+        private System.Windows.Forms.Button benchmark;
         // =======
         //         private System.Windows.Forms.Button button2;
         // >>>>>>> master

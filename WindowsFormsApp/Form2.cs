@@ -35,8 +35,7 @@ namespace WindowsFormsApp
             ca.CursorX.SelectionStart = 0;
             nVal.Value = N;
             nVal.Maximum = 300;
-            filterSize = len;
-            sampleRate = sRate;
+            sampleRate = 44800;
             cArray = inputArray;
         }
 
@@ -64,19 +63,20 @@ namespace WindowsFormsApp
             dftChart.ChartAreas[0].CursorX.SelectionEnd = selected;
         }
 
-        public void IDFT(Complex[] A)
+        public double[] IDFT(Complex[] A)
         {
             int len = A.Length;
-            double[] S = new double[len];
+            double[] dArray = new double[len];
 
             for (int t = 0; t < len; t++)
             {
-                S[t] = 0;
+                dArray[t] = 0;
                 for (int f = 0; f < len; f++)
                 {
-                    S[t] += A[f].re * Math.Cos(2 * Math.PI * f * t / len) - A[f].im * Math.Sin(2 * Math.PI * f * t / len);
+                    dArray[t] += A[f].re * Math.Cos(2 * Math.PI * f * t / len) - A[f].im * Math.Sin(2 * Math.PI * f * t / len);
                 }
             }
+            return dArray;
         }
 
 
@@ -91,12 +91,11 @@ namespace WindowsFormsApp
             int[] filter;
             double cutOffFreq = dftChart.ChartAreas[0].CursorX.Position;
 
-            Trace.WriteLine(cutOffFreq);
-            Trace.WriteLine(N);
-            Trace.WriteLine(sampleRate);
+            Trace.WriteLine("Cut off Freq: " + cutOffFreq);
+            Trace.WriteLine("N: " + N);
+            Trace.WriteLine("SampleRate: " + sampleRate + "\nIDFT filter:");
 
             int filterIndex = (int)Math.Ceiling(cutOffFreq * N / sampleRate);
-            Trace.WriteLine(filterIndex);
             if (lowfilter.Checked)
             {
                 filter = createLowFilter(filterIndex);
@@ -105,9 +104,24 @@ namespace WindowsFormsApp
             {
                 filter = createHighFilter(filterIndex);
             }
-
+            
+            double[] newFilter = IDFTfilter(filter);
+            for (int i = 0; i < newFilter.Length; i++)
+            {
+                Trace.WriteLine(newFilter[i]);
+            }
             convertBins(filter);
 
+        }
+
+        public double[] IDFTfilter(int[] filter) {
+            Complex[] complexFilter = new Complex[filter.Length];
+            for (int i = 0; i < filter.Length; i++)
+            {
+                complexFilter[i].re = filter[i];
+                complexFilter[i].im = 0;
+            }
+            return (IDFT(complexFilter));
         }
 
         private void lowfilter_CheckedChanged(object sender, EventArgs e)
@@ -173,7 +187,7 @@ namespace WindowsFormsApp
             bins = new int[N];
             for (int i = 0; i< cArray.Length; i++)
             {
-                Trace.WriteLine(cArray[i].re);
+                //Trace.WriteLine(cArray[i].re);
             }
             for (int i = 0; i < N; i++)
             {
