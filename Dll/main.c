@@ -21,7 +21,7 @@ BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 static HINSTANCE hInst;
 static PBYTE pSaveBuffer;
 static DWORD dwDataLength; 
-static DWORD nSamplesPerSec;
+static DWORD nSamplesPerSec = 44100;
 static DWORD nAvgBytesPerSec;
 static DWORD nBlockAlign;
 static DWORD wBitsPerSample;
@@ -61,6 +61,10 @@ EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen) {
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
     memcpy(tempBuffer, newbuffer, dwDataLength);
     pSaveBuffer = tempBuffer;
+}
+
+EXPORT DWORD getSampleRate() {
+    return nSamplesPerSec;
 }
 
 EXPORT void play() {

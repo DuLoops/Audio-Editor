@@ -22,3 +22,5 @@ EXPORT void end();
 EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen);
 
 EXPORT void pause();
+
+EXPORT DWORD getSampleRate();

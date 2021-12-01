@@ -47,6 +47,9 @@ namespace WindowsFormsApp
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern void pause();
 
+        [DllImport("DLL.dll", CharSet = CharSet.Auto)]
+        public static extern int getSampleRate();
+
         WaveHeader waveHeader = new WaveHeader();
         private readonly Stack<ZoomFrame> _zoomFrames = new Stack<ZoomFrame>();
         byte[] byteArray;
@@ -199,8 +202,9 @@ namespace WindowsFormsApp
         {
             InitializeComponent();
             styleChart();
-            loadBtn.Enabled = false;
-
+            endBtn.Enabled = false;
+            playBtn.Enabled = false;
+            pauseBtn.Enabled = false;
             unsafe
             {
                 start();
@@ -225,6 +229,8 @@ namespace WindowsFormsApp
             readHeader(open.FileName);
             //waveViewer1.WaveStream = new NAudio.Wave.WaveFileReader(open.FileName);
             displayWave();
+            playBtn.Enabled = true;
+            pauseBtn.Enabled = true;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -338,18 +344,20 @@ namespace WindowsFormsApp
 
         private void recordBtn_Click(object sender, EventArgs e)
         {
+            endBtn.Enabled = true;
+            recordBtn.Enabled = false;
             record();
         }
 
         private void endBtn_Click(object sender, EventArgs e)
         {
+            playBtn.Enabled = true;
+            pauseBtn.Enabled = true;
+            recordBtn.Enabled = true;
             end();
             loadAudio();
         }
 
-        private void loadBtn_Click(object sender, EventArgs e)
-        {
-        }
 
         public void loadAudio()
         {
@@ -385,8 +393,11 @@ namespace WindowsFormsApp
                 MessageBox.Show("Select values first");
                 return;
             }
-            Form2 dftForm = new Form2();
-            dftForm.displayDFT(DFT());
+            Complex[] dft = DFT();
+            waveHeader.sampleRate = getSampleRate();
+            Form2 dftForm = new Form2(dft, dft.Length, waveHeader.sampleRate);
+
+            dftForm.displayDFT();
             
             dftForm.Show();
         }

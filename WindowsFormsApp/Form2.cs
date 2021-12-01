@@ -15,20 +15,28 @@ namespace WindowsFormsApp
 {
     public partial class Form2 : Form
     {
-
-        public Form2()
+        Complex[] cArray;
+        int N = 100;
+        int filterSize;
+        int sampleRate;
+        public Form2(Complex[] inputArray, int len, int sRate)
         {
+
+
             InitializeComponent();
             ChartArea ca = dftChart.ChartAreas[0];  // quick reference
 
             ca.CursorX.IsUserEnabled = true;
-            ca.CursorX.IsUserSelectionEnabled = true;
-            ca.CursorX.AutoScroll = true;
+            ca.CursorX.IsUserSelectionEnabled = false;
             ca.CursorX.AutoScroll = false;
             ca.AxisX.ScaleView.Zoomable = false;
-            ca.AxisX.ScrollBar.Enabled = true;
-            ca.AxisX.Minimum = 0;
-            ca.AxisX.Maximum = Double.NaN;
+            lowfilter.Checked = true;
+            ca.CursorX.SelectionStart = 0;
+            nVal.Value = N;
+            nVal.Maximum = 300;
+            filterSize = len;
+            sampleRate = len;
+            cArray = inputArray;
         }
 
         private void Form2_Load(object sender, EventArgs e)
@@ -36,7 +44,7 @@ namespace WindowsFormsApp
 
         }
 
-        public void displayDFT(Complex[] cArray)
+        public void displayDFT()
         {
             dftChart.Series[0].Points.Clear();
             for (int i = 0; i < cArray.Length; i++)
@@ -47,7 +55,8 @@ namespace WindowsFormsApp
 
         private void chart1_Click(object sender, EventArgs e)
         {
-
+            long selected = (long)dftChart.ChartAreas[0].CursorX.Position;
+            dftChart.ChartAreas[0].CursorX.SelectionEnd = selected;
         }
 
         public void IDFT(Complex[] A)
@@ -64,6 +73,100 @@ namespace WindowsFormsApp
                 }
             }
             //doubleArray = S;
+        }
+
+
+
+        private void lowBtn_Click(object sender, EventArgs e)
+        {
+            if (double.IsNaN(dftChart.ChartAreas[0].CursorX.SelectionEnd))
+            {
+                MessageBox.Show("Select values first");
+                return;
+            }
+            int[] filter;
+            double cutOffFreq = dftChart.ChartAreas[0].CursorX.Position;
+
+            Trace.WriteLine(cutOffFreq);
+            Trace.WriteLine(N);
+            Trace.WriteLine(sampleRate);
+
+            int filterIndex = (int)Math.Ceiling(cutOffFreq * N / sampleRate);
+            Trace.WriteLine(filterIndex);
+            if (lowfilter.Checked)
+            {
+                filter = createLowFilter(filterIndex);
+            }
+            else
+            {
+                filter = createHighFilter(filterIndex);
+            }
+            for (int i = 0; i < filter.Length; i++)
+            {
+                //Trace.WriteLine(filter[i]);
+            }
+
+
+        }
+
+        private void lowfilter_CheckedChanged(object sender, EventArgs e)
+        {
+            if(highfilter.Checked)
+            {
+                lowfilter.Checked = false;
+                dftChart.ChartAreas[0].CursorX.SelectionStart = cArray.Length / 2;
+
+
+            } else
+            {
+                highfilter.Checked = false;
+                dftChart.ChartAreas[0].CursorX.SelectionStart = 0;
+
+            }
+
+        }
+
+        public int[] createLowFilter(int filterIndex)
+        {
+            int[] filter = new int[filterSize];
+            int counter = 0;
+            for (; counter < filterIndex + 1; counter++)
+            {
+                filter[counter] = 1;
+            }
+            for (; counter < filterSize - filterIndex + 1; counter++)
+            {
+                filter[counter] = 0;
+            }
+            for (; counter < filterSize; counter++)
+            {
+                filter[counter] = 1;
+            }
+            return filter;
+        }
+
+        public int[] createHighFilter(int filterIndex)
+        {
+            int[] filter = new int[filterSize];
+            int counter = 0;
+            for (; counter < filterIndex + 1; counter++)
+            {
+                filter[counter] = 0;
+            }
+            for (; counter < filterSize - filterIndex + 1; counter++)
+            {
+                filter[counter] = 1;
+            }
+            for (; counter < filterSize; counter++)
+            {
+                filter[counter] = 0;
+            }
+            return filter;
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            N = (int)nVal.Value;
         }
     }
 }
