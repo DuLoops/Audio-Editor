@@ -77,7 +77,6 @@ namespace WindowsFormsApp
                     S[t] += A[f].re * Math.Cos(2 * Math.PI * f * t / len) - A[f].im * Math.Sin(2 * Math.PI * f * t / len);
                 }
             }
-            //doubleArray = S;
         }
 
 
