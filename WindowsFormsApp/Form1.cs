@@ -35,7 +35,7 @@ namespace WindowsFormsApp
         public static extern uint getBufferLen();
 
         [DllImport("DLL.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
-        public static extern void clipBuffer(byte* newbuffer, long dLen);
+        public static extern void clipBuffer(byte* newbuffer, long dLen);   
 
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern void play();
@@ -50,21 +50,59 @@ namespace WindowsFormsApp
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
         public static extern int getSampleRate();
 
+        [DllImport("DLL.dll", CallingConvention = CallingConvention.Cdecl,  CharSet = CharSet.Auto)]
+        public static extern void setHeader(int _nSamplesPerSec, int _nAvgBytesPerSec, int _nBlockAlign, int _wBitsPerSample);
+
+        //Record DLL
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern int Rstart();
+
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr RgetBuffer();
+
+        [DllImport("recordDLL.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+        public static extern void RsetSaveBuffer(byte* ptr, long dLen, int sps, int bps, int nBlock, int wbps);
+
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern uint RgetBufferLen();
+
+        [DllImport("recordDLL.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+        public static extern void RclipBuffer(byte* newbuffer, long dLen);
+
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern void Rplay();
+
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern void Rrecord();
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern void Rend();
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern void Rpause();
+
+        [DllImport("recordDLL.dll", CharSet = CharSet.Auto)]
+        public static extern int RgetSampleRate();
+
+        [DllImport("DLL.dll", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Auto)]
+        public static extern void RsetHeader(int _nSamplesPerSec, int _nAvgBytesPerSec, int _nBlockAlign, int _wBitsPerSample);
+
         WaveHeader waveHeader = new WaveHeader();
         private readonly Stack<ZoomFrame> _zoomFrames = new Stack<ZoomFrame>();
-        byte[] byteArray;
-        double[] doubleArray;
+        byte[] byteArrayImport;
+        double[] doubleArrayImport;
         long userSelectionStart, userSelectionEnd;
         Boolean copied = false;
+        byte[] byteArrayRecorded;
+        double[] doubleArrayRecorded;
+        double[] doubleArrayCopy;
 
         public void readHeader(string filename)
         {
             BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open));
             waveHeader.reset();
-            if (byteArray != null)
+            if (byteArrayImport != null)
             {
-                Array.Clear(byteArray, 0, byteArray.Length);
-                Array.Clear(doubleArray, 0, doubleArray.Length);
+                Array.Clear(byteArrayImport, 0, byteArrayImport.Length);
+                Array.Clear(doubleArrayImport, 0, doubleArrayImport.Length);
             }
             waveHeader.chunkID = reader.ReadInt32();
             waveHeader.chunkSize = reader.ReadInt32();
@@ -79,39 +117,46 @@ namespace WindowsFormsApp
             waveHeader.bps = reader.ReadInt16();
             waveHeader.subchunk2ID = reader.ReadInt32();
             waveHeader.subchunk2Size = reader.ReadInt32();
-            byteArray = reader.ReadBytes(waveHeader.subchunk2Size);
+            byteArrayImport = reader.ReadBytes(waveHeader.subchunk2Size);
 
             short[] shortArray = new short[waveHeader.subchunk2Size / waveHeader.blockAligh];
 
             for (int i = 0; i < shortArray.Length; i++)
             {
-                shortArray[i] = BitConverter.ToInt16(byteArray, i * waveHeader.blockAligh);
+                shortArray[i] = BitConverter.ToInt16(byteArrayImport, i * waveHeader.blockAligh);
             }
-            doubleArray = shortArray.Select(x => (double)x).ToArray();
-            //setBuffer((IntPtr)byteArray);
- 
-            fixed (byte* byteP = byteArray)
+            doubleArrayImport = shortArray.Select(x => (double)x).ToArray();
+            fixed (byte* byteP = byteArrayImport)
             {
-                setSaveBuffer(byteP, byteArray.Length, waveHeader.sampleRate, waveHeader.byteRate, waveHeader.blockAligh, waveHeader.bps);
+                setSaveBuffer(byteP, byteArrayImport.Length, waveHeader.sampleRate, waveHeader.byteRate, waveHeader.blockAligh, waveHeader.bps);
             }
         }
 
         public void displayWave()
         {
             chart1.Series[0].Points.Clear();
-            for (int i = 0; i < doubleArray.Length; i++)
+            for (int i = 0; i < doubleArrayImport.Length; i++)
             {
-                chart1.Series[0].Points.Add(doubleArray[i]);
+                chart1.Series[0].Points.Add(doubleArrayImport[i]);
+            }
+        }
+
+        public void displayRecorded()
+        {
+            chartRecorded.Series[0].Points.Clear();
+            for (int i = 0; i < doubleArrayRecorded.Length; i++)
+            {
+                chartRecorded.Series[0].Points.Add(doubleArrayRecorded[i]);
             }
         }
 
         public Complex[] DFT()
         {
-            long start =  userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
-            long end = userSelectionEnd = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
-            if (end > doubleArray.Length)
+            long start =  userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
+            long end = userSelectionEnd = (long)chartRecorded.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArrayRecorded.Length)
             {
-                end = doubleArray.Length - 1;
+                end = doubleArrayRecorded.Length - 1;
             }
 
             int dftLen = (int)(end - start);
@@ -123,8 +168,8 @@ namespace WindowsFormsApp
                 cArray[f].re = 0;
                 for (int t = 0; t < dftLen; t++)
                 {
-                    cArray[f].re += byteArray[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
-                    cArray[f].im -= byteArray[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
+                    cArray[f].re += byteArrayRecorded[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
+                    cArray[f].im -= byteArrayRecorded[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
                 }
                 cArray[f].re /= dftLen;
                 cArray[f].im /= dftLen;
@@ -147,6 +192,18 @@ namespace WindowsFormsApp
             ca.AxisX.Minimum = 0;
             ca.AxisX.Maximum = Double.NaN;
             this.chart1.MouseWheel += chart1_MouseWheel;
+
+            ChartArea ca2 = chartRecorded.ChartAreas[0];  // quick reference
+
+            ca2.CursorX.IsUserEnabled = true;
+            ca2.CursorX.IsUserSelectionEnabled = true;
+            ca2.CursorX.AutoScroll = true;
+            ca2.CursorX.AutoScroll = false;
+            ca2.AxisX.ScaleView.Zoomable = false;
+            ca2.AxisX.ScrollBar.Enabled = true;
+            ca2.AxisX.Minimum = 0;
+            ca2.AxisX.Maximum = Double.NaN;
+            this.chartRecorded.MouseWheel += chart1_MouseWheel;
         }
 
 
@@ -184,9 +241,7 @@ namespace WindowsFormsApp
                     var xMin = xAxis.ScaleView.ViewMinimum;
                     var xMax = xAxis.ScaleView.ViewMaximum;
 
-
                     _zoomFrames.Push(new ZoomFrame { XStart = xMin, XFinish = xMax});
-
                     var posXStart = xAxis.PixelPositionToValue(e.Location.X) - (xMax - xMin) / 4;
                     var posXFinish = xAxis.PixelPositionToValue(e.Location.X) + (xMax - xMin) / 4;
 
@@ -208,6 +263,7 @@ namespace WindowsFormsApp
             unsafe
             {
                 start();
+                Rstart();
             }
         }
 
@@ -227,6 +283,7 @@ namespace WindowsFormsApp
             open.Filter = "Wave File ((.wav)|*.wav;";
             if (open.ShowDialog() != DialogResult.OK) return;
             readHeader(open.FileName);
+            setHeader(waveHeader.sampleRate, waveHeader.byteRate, waveHeader.blockAligh, waveHeader.bps);
             //waveViewer1.WaveStream = new NAudio.Wave.WaveFileReader(open.FileName);
             displayWave();
             playBtn.Enabled = true;
@@ -251,7 +308,28 @@ namespace WindowsFormsApp
 
         private void pause_Click(object sender, EventArgs e)
         {
-            pause();
+            if (recordedRadio.Checked && importedRadio.Checked)
+            {
+                unsafe
+                {
+                    pause();
+                    Rpause();
+                }
+            }
+            else if (importedRadio.Checked)
+            {
+                unsafe
+                {
+                    pause();
+                }
+            }
+            else if (recordedRadio.Checked)
+            {
+                unsafe
+                {
+                    Rpause();
+                }
+            }
         }
 
         static byte[] GetBytesAlt(double[] dArray)
@@ -269,84 +347,109 @@ namespace WindowsFormsApp
         private void copy_Click(object sender, EventArgs e)
         {
             copied = true;
-            userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
-            userSelectionEnd= (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
-            if (userSelectionEnd > doubleArray.Length)
+            userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
+            userSelectionEnd= (long)chartRecorded.ChartAreas[0].CursorX.SelectionEnd;
+            if (userSelectionEnd > doubleArrayRecorded.Length)
             {
-                userSelectionEnd = doubleArray.Length - 1;
+                userSelectionEnd = doubleArrayRecorded.Length - 1;
             }
+            int counter = 0;
+            doubleArrayCopy = new double[userSelectionEnd - userSelectionStart];
+            for (long i = userSelectionStart; i < userSelectionEnd; i++)
+            {
+                doubleArrayCopy[counter++] = doubleArrayRecorded[i];
+            }
+            Trace.WriteLine(doubleArrayCopy.Length);
+
         }
 
         private void Paste_Click(object sender, EventArgs e)
         {
-            long pasteDest = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
-            double[] temp = new double[doubleArray.Length + (userSelectionEnd - userSelectionStart)];
+            long pasteDest = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
+            double[] temp = new double[doubleArrayRecorded.Length + doubleArrayCopy.Length];
             long tempCounter = 0;
-            long copyCounter = userSelectionStart;
-            for (int i = 0; i < doubleArray.Length; i++)
+            long copyCounter = 0;
+            for (int i = 0; i < doubleArrayRecorded.Length; i++)
             {
                 if(i == pasteDest)
                 {
-                    while (copyCounter < userSelectionEnd)
+                    while (copyCounter < doubleArrayCopy.Length)
                     {
-                        temp[tempCounter++] = doubleArray[copyCounter++];
+                        temp[tempCounter++] = doubleArrayCopy[copyCounter++];
                     }
                 }
-                temp[tempCounter++] = doubleArray[i];
+                temp[tempCounter++] = doubleArrayRecorded[i];
             }
-            doubleArray = temp;
-            byteArray = GetBytesAlt(doubleArray);
-            waveHeader.subchunk2Size = byteArray.Length;
+            doubleArrayRecorded = temp;
+            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            //waveHeader.subchunk2Size = byteArrayImport.Length;
 
-            fixed (byte* byteP = byteArray)
+            fixed (byte* byteP = byteArrayRecorded)
             {
-                clipBuffer(byteP, byteArray.Length);
+                RclipBuffer(byteP, byteArrayRecorded.Length);
             }
 
-            displayWave();
+            displayRecorded();
         }
 
         private void Cut_Click(object sender, EventArgs e)
         {
-            ChartArea ca = chart1.ChartAreas[0];
+            ChartArea ca = chartRecorded.ChartAreas[0];
             long start = (long)ca.CursorX.SelectionStart;
             long end = (long)ca.CursorX.SelectionEnd;
-            if (end > doubleArray.Length)
+            if (end > doubleArrayRecorded.Length)
             {
-                end = doubleArray.Length - 1;
+                end = doubleArrayRecorded.Length - 1;
             }
-            double[] temp = new double[doubleArray.Length - (end - start)];
+            double[] temp = new double[doubleArrayRecorded.Length - (end - start)];
             int tempCounter = 0;
-            for (int i = 0; i < doubleArray.Length; i++)
+            for (int i = 0; i < doubleArrayRecorded.Length; i++)
             {
                 while (i >= start && i < end) { i++; }
-                temp[tempCounter++] = doubleArray[i];
+                temp[tempCounter++] = doubleArrayRecorded[i];
             }
-            doubleArray = temp;
-            byteArray = GetBytesAlt(doubleArray);
-            waveHeader.subchunk2Size = byteArray.Length;
+            doubleArrayRecorded = temp;
+            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            //waveHeader.subchunk2Size = byteArrayImport.Length;
 
-            fixed (byte* byteP = byteArray)
+            fixed (byte* byteP = byteArrayRecorded)
             {
-                clipBuffer(byteP, byteArray.Length);
+                RclipBuffer(byteP, byteArrayRecorded.Length);
             }
 
-            displayWave();
+            displayRecorded();
             ca.CursorX.SetSelectionPosition(0, 0);
         }
         private void play_click(object sender, EventArgs e)
         {
-            unsafe
+            if (recordedRadio.Checked && importedRadio.Checked)
             {
-                play();
+                unsafe
+                {
+                    play();
+                    Rplay();
+                }
+            } else if (importedRadio.Checked)
+            {
+                unsafe
+                {
+                    play();
+                }
+            } else if (recordedRadio.Checked)
+            {
+                unsafe
+                {
+                    Rplay();
+                }
             }
+            
         }
 
         private void recordBtn_Click(object sender, EventArgs e)
         {
             endBtn.Enabled = true;
             recordBtn.Enabled = false;
-            record();
+            Rrecord();
         }
 
         private void endBtn_Click(object sender, EventArgs e)
@@ -354,48 +457,51 @@ namespace WindowsFormsApp
             playBtn.Enabled = true;
             pauseBtn.Enabled = true;
             recordBtn.Enabled = true;
-            end();
-            loadAudio();
+            Rend();
+            loadAudioRecorded();
         }
 
 
-        public void loadAudio()
+        public void loadAudioRecorded()
         {
-            IntPtr bufferP = getBuffer();
-            uint bufferLen = getBufferLen();
-            if (byteArray != null)
+            IntPtr bufferP = RgetBuffer();
+            uint bufferLen = RgetBufferLen();
+            if (byteArrayRecorded != null)
             {
-                Array.Clear(byteArray, 0, byteArray.Length);
-                Array.Clear(doubleArray, 0, doubleArray.Length);
+                Array.Clear(byteArrayRecorded, 0, byteArrayRecorded.Length);
+                Array.Clear(doubleArrayRecorded, 0, doubleArrayRecorded.Length);
             }
-            byteArray = new byte[bufferLen];
+            byteArrayRecorded = new byte[bufferLen];
 
             unsafe
             {
                 byte* bPointer = (byte*)bufferP;
                 for (int i = 0; i < bufferLen; i++)
                 {
-                    byteArray[i] = bPointer[i];
+                    byteArrayRecorded[i] = bPointer[i];
                 }
             }
 
-            short[] sdata = new short[(int)Math.Ceiling((double)byteArray.Length / 2)];
-            Buffer.BlockCopy(byteArray, 0, sdata, 0, byteArray.Length);
-            doubleArray = sdata.Select(x => (double)x).ToArray();
+            short[] sdata = new short[(int)Math.Ceiling((double)byteArrayRecorded.Length / 2)];
+            Buffer.BlockCopy(byteArrayRecorded, 0, sdata, 0, byteArrayRecorded.Length);
+            doubleArrayRecorded = sdata.Select(x => (double)x).ToArray();
 
-            displayWave();
+            displayRecorded();
+        }
+
+        private void recorded_CheckedChanged(object sender, EventArgs e)
+        {
         }
 
         private void dft_click(object sender, EventArgs e)
         {
-            if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart ||  double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
+            if (chartRecorded.ChartAreas[0].CursorX.SelectionEnd == chartRecorded.ChartAreas[0].CursorX.SelectionStart ||  double.IsNaN(chartRecorded.ChartAreas[0].CursorX.SelectionEnd))
             {
                 MessageBox.Show("Select values first");
                 return;
             }
             Complex[] dft = DFT();
-            waveHeader.sampleRate = getSampleRate();
-            Form2 dftForm = new Form2(dft, dft.Length, waveHeader.sampleRate);
+            Form2 dftForm = new Form2(dft, dft.Length, RgetSampleRate());
 
             dftForm.displayDFT();
             

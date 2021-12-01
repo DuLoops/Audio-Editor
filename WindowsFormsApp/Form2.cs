@@ -16,7 +16,8 @@ namespace WindowsFormsApp
     public partial class Form2 : Form
     {
         Complex[] cArray;
-        int N = 100;
+        int[] bins;
+        int N = 50;
         int filterSize;
         int sampleRate;
         public Form2(Complex[] inputArray, int len, int sRate)
@@ -35,7 +36,7 @@ namespace WindowsFormsApp
             nVal.Value = N;
             nVal.Maximum = 300;
             filterSize = len;
-            sampleRate = len;
+            sampleRate = sRate;
             cArray = inputArray;
         }
 
@@ -56,6 +57,10 @@ namespace WindowsFormsApp
         private void chart1_Click(object sender, EventArgs e)
         {
             long selected = (long)dftChart.ChartAreas[0].CursorX.Position;
+            if (selected >= cArray.Length / 2)
+            {
+                selected = cArray.Length / 2;
+            }
             dftChart.ChartAreas[0].CursorX.SelectionEnd = selected;
         }
 
@@ -101,11 +106,8 @@ namespace WindowsFormsApp
             {
                 filter = createHighFilter(filterIndex);
             }
-            for (int i = 0; i < filter.Length; i++)
-            {
-                //Trace.WriteLine(filter[i]);
-            }
 
+            convertBins(filter);
 
         }
 
@@ -116,29 +118,27 @@ namespace WindowsFormsApp
                 lowfilter.Checked = false;
                 dftChart.ChartAreas[0].CursorX.SelectionStart = cArray.Length / 2;
 
-
             } else
             {
                 highfilter.Checked = false;
                 dftChart.ChartAreas[0].CursorX.SelectionStart = 0;
-
             }
 
         }
 
         public int[] createLowFilter(int filterIndex)
         {
-            int[] filter = new int[filterSize];
+            int[] filter = new int[N];
             int counter = 0;
             for (; counter < filterIndex + 1; counter++)
             {
                 filter[counter] = 1;
             }
-            for (; counter < filterSize - filterIndex + 1; counter++)
+            for (; counter < N - filterIndex; counter++)
             {
                 filter[counter] = 0;
             }
-            for (; counter < filterSize; counter++)
+            for (; counter < N; counter++)
             {
                 filter[counter] = 1;
             }
@@ -147,17 +147,17 @@ namespace WindowsFormsApp
 
         public int[] createHighFilter(int filterIndex)
         {
-            int[] filter = new int[filterSize];
+            int[] filter = new int[N];
             int counter = 0;
             for (; counter < filterIndex + 1; counter++)
             {
                 filter[counter] = 0;
             }
-            for (; counter < filterSize - filterIndex + 1; counter++)
+            for (; counter < N - filterIndex; counter++)
             {
                 filter[counter] = 1;
             }
-            for (; counter < filterSize; counter++)
+            for (; counter < N; counter++)
             {
                 filter[counter] = 0;
             }
@@ -167,6 +167,19 @@ namespace WindowsFormsApp
         private void numericUpDown1_ValueChanged(object sender, EventArgs e)
         {
             N = (int)nVal.Value;
+        }
+
+        public void convertBins(int[] filter)
+        {
+            bins = new int[N];
+            for (int i = 0; i< cArray.Length; i++)
+            {
+                Trace.WriteLine(cArray[i].re);
+            }
+            for (int i = 0; i < N; i++)
+            {
+                //bins[i] = cArray[]
+            }
         }
     }
 }
