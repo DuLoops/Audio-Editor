@@ -133,6 +133,77 @@ namespace WindowsFormsApp
             return cArray;
         }
 
+        public byte[] windowing()
+        {
+            long start = userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
+            long end = userSelectionEnd = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArray.Length)
+            {
+                end = doubleArray.Length - 1;
+            }
+
+            int dftLen = (int)(end - start);
+
+            byte[] wArray = byteArray;
+
+            for (int i = (int)start; i < (int)end; i++)
+            {
+                if (wArray[i] <= ((dftLen - 1) / 2))
+                {
+                    wArray[i] = 1;
+                }
+                else
+                {
+                    wArray[i] = 0;
+                }
+            }
+
+            return wArray;
+        }
+
+        public Complex[] windowingDFT()
+        {
+            long start = userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
+            long end = userSelectionEnd = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArray.Length)
+            {
+                end = doubleArray.Length - 1;
+            }
+
+            int dftLen = (int)(end - start);
+
+            byte[] wArray = byteArray;
+
+            for (int i = (int)start; i < (int)end; i++)
+            {
+                if (wArray[i] <= ((dftLen - 1) / 2))
+                {
+                    wArray[i] = 1;
+                }
+                else
+                {
+                    wArray[i] = 0;
+                }
+            }
+
+            Complex[] cArray = new Complex[dftLen];
+
+            for (int f = 0; f < dftLen; f++)
+            {
+                cArray[f].im = 0;
+                cArray[f].re = 0;
+                for (int t = 0; t < dftLen; t++)
+                {
+                    cArray[f].re += wArray[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
+                    cArray[f].im -= wArray[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
+                }
+                cArray[f].re /= dftLen;
+                cArray[f].im /= dftLen;
+            }
+
+            return cArray;
+        }
+
 
         public void styleChart()
         {
@@ -384,6 +455,27 @@ namespace WindowsFormsApp
             doubleArray = sdata.Select(x => (double)x).ToArray();
 
             displayWave();
+        }
+
+        private void window_click(object sender, EventArgs e)
+        {
+            if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
+            {
+                MessageBox.Show("Select values first");
+                return;
+            }
+            waveHeader.sampleRate = getSampleRate();
+
+            byte[] b = windowing();
+
+            Complex[] dft = windowingDFT();
+            
+            Form3 windowForm = new Form3(dft, b, byteArray.Length);
+
+            windowForm.displayWindowing();
+            windowForm.displayWDFT();
+
+            windowForm.Show();
         }
 
         private void dft_click(object sender, EventArgs e)
