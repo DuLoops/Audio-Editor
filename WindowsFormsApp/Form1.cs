@@ -180,16 +180,16 @@ namespace WindowsFormsApp
 
         public byte[] windowing()
         {
-            long start = userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
-            long end = userSelectionEnd = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
-            if (end > doubleArray.Length)
+            long start = userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
+            long end = userSelectionEnd = (long)chartRecorded.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArrayRecorded .Length)
             {
-                end = doubleArray.Length - 1;
+                end = doubleArrayRecorded.Length - 1;
             }
 
             int dftLen = (int)(end - start);
 
-            byte[] wArray = byteArray;
+            byte[] wArray = byteArrayRecorded;
 
             for (int i = (int)start; i < (int)end; i++)
             {
@@ -208,16 +208,16 @@ namespace WindowsFormsApp
 
         public Complex[] windowingDFT()
         {
-            long start = userSelectionStart = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
-            long end = userSelectionEnd = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
-            if (end > doubleArray.Length)
+            long start = userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
+            long end = userSelectionEnd = (long)chartRecorded.ChartAreas[0].CursorX.SelectionEnd;
+            if (end > doubleArrayRecorded.Length)
             {
-                end = doubleArray.Length - 1;
+                end = doubleArrayRecorded.Length - 1;
             }
 
             int dftLen = (int)(end - start);
 
-            byte[] wArray = byteArray;
+            byte[] wArray = byteArrayRecorded;
 
             for (int i = (int)start; i < (int)end; i++)
             {
@@ -601,7 +601,7 @@ namespace WindowsFormsApp
 
         private void window_click(object sender, EventArgs e)
         {
-            if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
+            if (chartRecorded.ChartAreas[0].CursorX.SelectionEnd == chartRecorded.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chartRecorded.ChartAreas[0].CursorX.SelectionEnd))
             {
                 MessageBox.Show("Select values first");
                 return;
@@ -612,13 +612,14 @@ namespace WindowsFormsApp
 
             Complex[] dft = windowingDFT();
             
-            Form3 windowForm = new Form3(dft, b, byteArray.Length);
+            Form3 windowForm = new Form3(dft, b, byteArrayRecorded.Length);
 
             windowForm.displayWindowing();
             windowForm.displayWDFT();
 
             windowForm.Show();
         }
+
 
         private void dft_click(object sender, EventArgs e)
         {
