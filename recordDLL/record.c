@@ -4,7 +4,7 @@
   ----------------------------------------*/
 
 #include <windows.h>
-#include "main.h"
+#include "record.h"
 #include "mmeapi.h"
 
 #define IDC_RECORD_BEG                  1000
@@ -20,7 +20,7 @@
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 static HINSTANCE hInst;
 static PBYTE pSaveBuffer;
-static DWORD dwDataLength; 
+static DWORD dwDataLength;
 static DWORD nSamplesPerSec;
 static DWORD nAvgBytesPerSec;
 static DWORD nBlockAlign;
@@ -36,15 +36,15 @@ int WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, PVOID pvReserved)
     return TRUE;
 }
 
-EXPORT PBYTE getBuffer() {
+EXPORT PBYTE RgetBuffer() {
     return pSaveBuffer;
 }
 
-EXPORT DWORD getBufferLen() {
+EXPORT DWORD RgetBufferLen() {
     return dwDataLength;
 }
 
-EXPORT void setSaveBuffer(PBYTE newbuffer, long dLen, DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
+EXPORT void RsetSaveBuffer(PBYTE newbuffer, long dLen, DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
     dwDataLength = dLen;
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
     memcpy(tempBuffer, newbuffer, dwDataLength);
@@ -56,7 +56,7 @@ EXPORT void setSaveBuffer(PBYTE newbuffer, long dLen, DWORD _nSamplesPerSec, DWO
     isRecorded = FALSE;
 }
 
-EXPORT void setHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
+EXPORT void RsetHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
 
     nSamplesPerSec = _nSamplesPerSec;
     nAvgBytesPerSec = _nAvgBytesPerSec;
@@ -64,27 +64,27 @@ EXPORT void setHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlo
     wBitsPerSample = _wBitsPerSample;
 }
 
-EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen) {
+EXPORT void RclipBuffer(PBYTE newbuffer, DWORD dLen) {
     dwDataLength = dLen;
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
     memcpy(tempBuffer, newbuffer, dwDataLength);
     pSaveBuffer = tempBuffer;
 }
 
-EXPORT DWORD getSampleRate() {
+EXPORT DWORD RgetSampleRate() {
     return nSamplesPerSec;
 }
 
-EXPORT void play() {
+EXPORT void Rplay() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_BEG, 0), 0);
 }
-EXPORT void record() {
+EXPORT void Rrecord() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_BEG, 0), 0);
 }
-EXPORT void end() {
+EXPORT void Rend() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_END, 0), 0);
 }
-EXPORT void pause() {
+EXPORT void Rpause() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_PAUSE, 0), 0);
 }
 
@@ -97,9 +97,9 @@ DWORD WINAPI messageThreadFunc(PVOID pParam) {
     return 0;
 }
 
-EXPORT int CALLBACK start()
+EXPORT int CALLBACK Rstart()
 {
-    dlghnd = CreateDialog(hInst, TEXT(".wav Player"), NULL, DlgProc);
+    dlghnd = CreateDialog(hInst, TEXT("Record"), NULL, DlgProc);
     if (-1 == dlghnd)
     {
         MessageBox(NULL, TEXT("This program requires Windows NT!"),
@@ -123,7 +123,7 @@ void ReverseMemory(BYTE* pBuffer, int iLength)
         pBuffer[iLength - i - 1] = b;
     }
 }
- 
+
 BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static BOOL         bRecording, bPlaying, bReverse, bPaused,
@@ -235,7 +235,8 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 waveform.wBitsPerSample = 16;
                 waveform.cbSize = 0;
 
-            } else {
+            }
+            else {
                 waveform.wFormatTag = WAVE_FORMAT_PCM;
                 waveform.nChannels = 1;
                 waveform.nSamplesPerSec = nSamplesPerSec;
@@ -246,13 +247,15 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             }
 
-            if (waveOutOpen(&hWaveOut, WAVE_MAPPER, &waveform,
-                (DWORD)hwnd, 0, CALLBACK_WINDOW))
-            {
-                MessageBeep(MB_ICONEXCLAMATION);
-                MessageBox(hwnd, szOpenError, szAppName,
-                    MB_ICONEXCLAMATION | MB_OK);
-            }
+            \
+
+                if (waveOutOpen(&hWaveOut, WAVE_MAPPER, &waveform,
+                    (DWORD)hwnd, 0, CALLBACK_WINDOW))
+                {
+                    MessageBeep(MB_ICONEXCLAMATION);
+                    MessageBox(hwnd, szOpenError, szAppName,
+                        MB_ICONEXCLAMATION | MB_OK);
+                }
             return TRUE;
 
         case IDC_PLAY_PAUSE:
