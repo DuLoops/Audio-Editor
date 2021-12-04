@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp
 {
-    class WaveHeader
+    public class WaveHeader
     {
         public int chunkID;
         public int chunkSize;

@@ -201,9 +201,10 @@ namespace WindowsFormsApp
         // Perform DFT Using Threading
         // Pre: setThread as Integer (Number of Threads Used)
         // Return: Complex Array Of Wave Value After DFT
-        public Complex[] DFTthreading(int setThread)
-        {
 
+        public Complex[] DFTthreading()
+        {   
+            
             long start = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
             long end = (long)chart1.ChartAreas[0].CursorX.SelectionEnd;
             if (end > doubleArrayImport.Length)
@@ -234,9 +235,6 @@ namespace WindowsFormsApp
             t[3].Join();
             t[4].Join();
             t[5].Join();
-
-
-
             return cArray;
         }
 
@@ -279,6 +277,7 @@ namespace WindowsFormsApp
             }
 
         }
+
 
         // Windowing
         public byte[] windowing()
@@ -512,7 +511,7 @@ namespace WindowsFormsApp
             }
         }
 
-        static byte[] GetBytesAlt(double[] dArray)
+        static byte[] convertDoubleToByteArray(double[] dArray)
         {
             short[] sArray = new short[dArray.Length];
             sArray = dArray.Select(x => (short)(x)).ToArray();
@@ -563,7 +562,7 @@ namespace WindowsFormsApp
                 temp[tempCounter++] = doubleArrayRecorded[i];
             }
             doubleArrayRecorded = temp;
-            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            byteArrayRecorded = convertDoubleToByteArray(doubleArrayRecorded);
             //waveHeader.subchunk2Size = byteArrayImport.Length;
 
             fixed (byte* byteP = byteArrayRecorded)
@@ -592,7 +591,7 @@ namespace WindowsFormsApp
                 temp[tempCounter++] = doubleArrayRecorded[i];
             }
             doubleArrayRecorded = temp;
-            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            byteArrayRecorded = convertDoubleToByteArray(doubleArrayRecorded);
             //waveHeader.subchunk2Size = byteArrayImport.Length;
 
             fixed (byte* byteP = byteArrayRecorded)
@@ -760,7 +759,7 @@ namespace WindowsFormsApp
             GC.WaitForPendingFinalizers();
             GC.Collect();
             watch.Start();
-            DFTthreading(10);
+            DFTthreading();
             watch.Stop();
             var threadingTime = watch.Elapsed.TotalMilliseconds;
 
@@ -769,7 +768,13 @@ namespace WindowsFormsApp
 
         }
 
+        public void setNewDoubleAndByteArray(double[] newDArray, byte[] newBArray) {
+            doubleArrayImport = newDArray;
+            byteArrayImport = newBArray;
+        } 
+
         // DFT Button (Pop Up New Form To Display DFT Value On Graph)
+
         private void dft_click(object sender, EventArgs e)
         {
             if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
@@ -777,8 +782,8 @@ namespace WindowsFormsApp
                 MessageBox.Show("Select values first");
                 return;
             }
-            Complex[] dft = DFTthreading(10);
-            Form2 dftForm = new Form2(dft, dft.Length, RgetSampleRate());
+            Complex[] dft = DFTthreading();
+            Form2 dftForm = new Form2(dft, waveHeader, doubleArrayImport);
 
             dftForm.displayDFT();
 

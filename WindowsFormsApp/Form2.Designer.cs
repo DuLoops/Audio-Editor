@@ -47,26 +47,25 @@
             chartArea1.Name = "ChartArea1";
             this.dftChart.ChartAreas.Add(chartArea1);
             this.dftChart.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.dftChart.Location = new System.Drawing.Point(12, 144);
-            this.dftChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.dftChart.Location = new System.Drawing.Point(11, 115);
             this.dftChart.Name = "dftChart";
             series1.ChartArea = "ChartArea1";
             series1.Name = "Series1";
             this.dftChart.Series.Add(series1);
-            this.dftChart.Size = new System.Drawing.Size(834, 459);
+            this.dftChart.Size = new System.Drawing.Size(741, 367);
             this.dftChart.TabIndex = 0;
             this.dftChart.Text = "chart1";
             this.dftChart.Click += new System.EventHandler(this.chart1_Click);
             // 
             // saveBtn
             // 
-            this.saveBtn.Location = new System.Drawing.Point(606, 42);
-            this.saveBtn.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.saveBtn.Location = new System.Drawing.Point(539, 34);
             this.saveBtn.Name = "saveBtn";
-            this.saveBtn.Size = new System.Drawing.Size(180, 62);
+            this.saveBtn.Size = new System.Drawing.Size(160, 50);
             this.saveBtn.TabIndex = 1;
             this.saveBtn.Text = "Save/IDFT";
             this.saveBtn.UseVisualStyleBackColor = true;
+            this.saveBtn.Click += new System.EventHandler(this.saveBtn_Click);
             // 
             // groupBox1
             // 
@@ -74,27 +73,31 @@
             this.groupBox1.Controls.Add(this.lowfilter);
             this.groupBox1.Controls.Add(this.highfilter);
             this.groupBox1.Controls.Add(this.filter);
-            this.groupBox1.Location = new System.Drawing.Point(66, 12);
+            this.groupBox1.Location = new System.Drawing.Point(59, 10);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(279, 125);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.groupBox1.Size = new System.Drawing.Size(248, 100);
             this.groupBox1.TabIndex = 2;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Filter";
             // 
             // nVal
             // 
-            this.nVal.Location = new System.Drawing.Point(165, 25);
+            this.nVal.Location = new System.Drawing.Point(147, 20);
+            this.nVal.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.nVal.Name = "nVal";
-            this.nVal.Size = new System.Drawing.Size(108, 26);
+            this.nVal.Size = new System.Drawing.Size(96, 22);
             this.nVal.TabIndex = 3;
             this.nVal.ValueChanged += new System.EventHandler(this.numericUpDown1_ValueChanged);
             // 
             // lowfilter
             // 
             this.lowfilter.AutoSize = true;
-            this.lowfilter.Location = new System.Drawing.Point(20, 40);
+            this.lowfilter.Location = new System.Drawing.Point(18, 32);
+            this.lowfilter.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lowfilter.Name = "lowfilter";
-            this.lowfilter.Size = new System.Drawing.Size(111, 24);
+            this.lowfilter.Size = new System.Drawing.Size(98, 20);
             this.lowfilter.TabIndex = 2;
             this.lowfilter.TabStop = true;
             this.lowfilter.Text = "Low - Pass";
@@ -104,9 +107,10 @@
             // highfilter
             // 
             this.highfilter.AutoSize = true;
-            this.highfilter.Location = new System.Drawing.Point(20, 82);
+            this.highfilter.Location = new System.Drawing.Point(18, 66);
+            this.highfilter.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.highfilter.Name = "highfilter";
-            this.highfilter.Size = new System.Drawing.Size(115, 24);
+            this.highfilter.Size = new System.Drawing.Size(102, 20);
             this.highfilter.TabIndex = 3;
             this.highfilter.TabStop = true;
             this.highfilter.Text = "High - Pass";
@@ -114,23 +118,23 @@
             // 
             // filter
             // 
-            this.filter.Location = new System.Drawing.Point(165, 62);
+            this.filter.Location = new System.Drawing.Point(147, 50);
+            this.filter.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.filter.Name = "filter";
-            this.filter.Size = new System.Drawing.Size(108, 57);
+            this.filter.Size = new System.Drawing.Size(96, 46);
             this.filter.TabIndex = 0;
             this.filter.Text = "Filter";
             this.filter.UseVisualStyleBackColor = true;
-            this.filter.Click += new System.EventHandler(this.lowBtn_Click);
+            this.filter.Click += new System.EventHandler(this.filter_click);
             // 
             // Form2
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(858, 616);
+            this.ClientSize = new System.Drawing.Size(763, 493);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.saveBtn);
             this.Controls.Add(this.dftChart);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Form2";
             this.Text = "DFT";
             this.Load += new System.EventHandler(this.Form2_Load);
