@@ -188,7 +188,7 @@ namespace WindowsFormsApp
 
         int numThread = 4;
 
-        public Complex[] DFTthreading(int setThread)
+        public Complex[] DFTthreading()
         {   
             
             long start = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
@@ -221,9 +221,6 @@ namespace WindowsFormsApp
             t[3].Join();
             t[4].Join();
             t[5].Join();
-
-
-
             return cArray;
         }
 
@@ -248,16 +245,6 @@ namespace WindowsFormsApp
             }
         }
 
-        public void binCalc(Complex[] cArray, int f, int dftLen)
-        {
-            for (int t = 0; t < dftLen; t++)
-            {
-                cArray[f].re += byteArrayImport[t] * Math.Cos(2 * Math.PI * t * f / dftLen);
-                cArray[f].im -= byteArrayImport[t] * Math.Sin(2 * Math.PI * t * f / dftLen);
-
-            }
-        
-        }
 
         public byte[] windowing()
         {
@@ -484,7 +471,7 @@ namespace WindowsFormsApp
             }
         }
 
-        static byte[] GetBytesAlt(double[] dArray)
+        static byte[] convertDoubleToByteArray(double[] dArray)
         {
             short[] sArray = new short[dArray.Length];
             sArray = dArray.Select(x => (short)(x)).ToArray();
@@ -533,7 +520,7 @@ namespace WindowsFormsApp
                 temp[tempCounter++] = doubleArrayRecorded[i];
             }
             doubleArrayRecorded = temp;
-            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            byteArrayRecorded = convertDoubleToByteArray(doubleArrayRecorded);
             //waveHeader.subchunk2Size = byteArrayImport.Length;
 
             fixed (byte* byteP = byteArrayRecorded)
@@ -561,7 +548,7 @@ namespace WindowsFormsApp
                 temp[tempCounter++] = doubleArrayRecorded[i];
             }
             doubleArrayRecorded = temp;
-            byteArrayRecorded = GetBytesAlt(doubleArrayRecorded);
+            byteArrayRecorded = convertDoubleToByteArray(doubleArrayRecorded);
             //waveHeader.subchunk2Size = byteArrayImport.Length;
 
             fixed (byte* byteP = byteArrayRecorded)
@@ -719,7 +706,7 @@ namespace WindowsFormsApp
             GC.WaitForPendingFinalizers();
             GC.Collect();
             watch.Start();
-            DFTthreading(10);
+            DFTthreading();
             watch.Stop();
             var threadingTime = watch.Elapsed.TotalMilliseconds;
 
@@ -728,6 +715,11 @@ namespace WindowsFormsApp
 
         }
 
+        public void setNewDoubleAndByteArray(double[] newDArray, byte[] newBArray) {
+            doubleArrayImport = newDArray;
+            byteArrayImport = newBArray;
+        } 
+
         private void dft_click(object sender, EventArgs e)
         {
             if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart ||  double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
@@ -735,8 +727,8 @@ namespace WindowsFormsApp
                 MessageBox.Show("Select values first");
                 return;
             }
-            Complex[] dft = DFTthreading(10);
-            Form2 dftForm = new Form2(dft, dft.Length, RgetSampleRate());
+            Complex[] dft = DFTthreading();
+            Form2 dftForm = new Form2(dft, waveHeader, doubleArrayImport);
 
             dftForm.displayDFT();
             
