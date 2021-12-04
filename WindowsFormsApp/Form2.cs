@@ -20,6 +20,8 @@ namespace WindowsFormsApp
         int N = 50;
         int filterSize;
         int sampleRate;
+
+        // Form 2 (Takes In Complex Array, Length Of Buffer and Sample Rate)
         public Form2(Complex[] inputArray, int len, int sRate)
         {
 
@@ -44,6 +46,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Display DFT Value On Graph
         public void displayDFT()
         {
             dftChart.Series[0].Points.Clear();
@@ -53,6 +56,7 @@ namespace WindowsFormsApp
             }
         }
 
+        // Select Part Of the Graph Function
         private void chart1_Click(object sender, EventArgs e)
         {
             long selected = (long)dftChart.ChartAreas[0].CursorX.Position;
@@ -63,6 +67,7 @@ namespace WindowsFormsApp
             dftChart.ChartAreas[0].CursorX.SelectionEnd = selected;
         }
 
+        // Perform IDFT On Wave
         public double[] IDFT(Complex[] A)
         {
             int len = A.Length;
@@ -80,7 +85,7 @@ namespace WindowsFormsApp
         }
 
 
-
+        // Create Low Pass Filter Button
         private void lowBtn_Click(object sender, EventArgs e)
         {
             if (double.IsNaN(dftChart.ChartAreas[0].CursorX.SelectionEnd))
@@ -114,6 +119,8 @@ namespace WindowsFormsApp
 
         }
 
+        // Perform IDFT on Filtered Value
+        // Pre: filter as Integer Array
         public double[] IDFTfilter(int[] filter) {
             Complex[] complexFilter = new Complex[filter.Length];
             for (int i = 0; i < filter.Length; i++)
@@ -124,6 +131,7 @@ namespace WindowsFormsApp
             return (IDFT(complexFilter));
         }
 
+        // Check Filter Change
         private void lowfilter_CheckedChanged(object sender, EventArgs e)
         {
             if(highfilter.Checked)
@@ -139,6 +147,8 @@ namespace WindowsFormsApp
 
         }
 
+
+        // Perform Low Pass Filter
         public int[] createLowFilter(int filterIndex)
         {
             int[] filter = new int[N];
@@ -158,6 +168,7 @@ namespace WindowsFormsApp
             return filter;
         }
 
+        // Perform High Pass Filter
         public int[] createHighFilter(int filterIndex)
         {
             int[] filter = new int[N];
@@ -181,12 +192,6 @@ namespace WindowsFormsApp
         {
             N = (int)nVal.Value;
         }
-
-<<<<<<< HEAD
-        private void Form2_Load(object sender, EventArgs e)
-        {
-
-=======
         public void convertBins(int[] filter)
         {
             bins = new int[N];
@@ -198,7 +203,6 @@ namespace WindowsFormsApp
             {
                 //bins[i] = cArray[]
             }
->>>>>>> 024b4ca266e78e290657bfe0483cf88121175363
         }
     }
 }

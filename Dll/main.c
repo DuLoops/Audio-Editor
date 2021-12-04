@@ -30,20 +30,32 @@ static HWND dlghnd;
 
 TCHAR szAppName[] = TEXT("Record");
 
+
 int WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, PVOID pvReserved)
 {
     hInst = hInstance;
     return TRUE;
 }
 
+// Get Buffer Pointer
+// Return: pSaveBuffer as Byte Pointer
 EXPORT PBYTE getBuffer() {
     return pSaveBuffer;
 }
 
+// Get Buffer Length
+// Return: dwDataLength as Double Word
 EXPORT DWORD getBufferLen() {
     return dwDataLength;
 }
 
+// Set Buffer
+// Pre: newbuffer as Byte Pointer
+// Pre: dLen as Long
+// Pre: _nSamplesPerSec as Double Word
+// Pre: _nAvgByte as Double Word
+// Pre: _nBlockAlign as Double Word
+// Pre: _wBitsPerSample as Double Word
 EXPORT void setSaveBuffer(PBYTE newbuffer, long dLen, DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
     dwDataLength = dLen;
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
@@ -56,6 +68,11 @@ EXPORT void setSaveBuffer(PBYTE newbuffer, long dLen, DWORD _nSamplesPerSec, DWO
     isRecorded = FALSE;
 }
 
+// Set Header
+// Pre: _nSamplesPerSec as Double Word
+// Pre: _nAvgByte as Double Word
+// Pre: _nBlockAlign as Double Word
+// Pre: _wBitsPerSample as Double Word
 EXPORT void setHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlockAlign, DWORD _wBitsPerSample) {
 
     nSamplesPerSec = _nSamplesPerSec;
@@ -64,6 +81,9 @@ EXPORT void setHeader(DWORD _nSamplesPerSec, DWORD _nAvgBytesPerSec, DWORD _nBlo
     wBitsPerSample = _wBitsPerSample;
 }
 
+// Clip Buffer
+// Pre: newbuffer as Byte Pointer
+// Pre: dLen as Long
 EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen) {
     dwDataLength = dLen;
     PBYTE tempBuffer = realloc(pSaveBuffer, dwDataLength);
@@ -71,23 +91,36 @@ EXPORT void clipBuffer(PBYTE newbuffer, DWORD dLen) {
     pSaveBuffer = tempBuffer;
 }
 
+// Get Sample Rate
+// Return: nSamplesPerSec as Double Word
 EXPORT DWORD getSampleRate() {
     return nSamplesPerSec;
 }
 
+// Play Sound Saved (In Buffer)
 EXPORT void play() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_BEG, 0), 0);
 }
+
+// Record Sound (Begin Recording Sound)
 EXPORT void record() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_BEG, 0), 0);
 }
+
+// End Record (Save Sound in Buffer)
 EXPORT void end() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_RECORD_END, 0), 0);
 }
+
+// Pause Record
 EXPORT void pause() {
     SendMessage(dlghnd, WM_COMMAND, MAKEWPARAM(IDC_PLAY_PAUSE, 0), 0);
 }
 
+
+// Create Message Thread
+// Pre: pParam as Void Pointer
+// Return: 0 as Double Word
 DWORD WINAPI messageThreadFunc(PVOID pParam) {
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
@@ -97,6 +130,8 @@ DWORD WINAPI messageThreadFunc(PVOID pParam) {
     return 0;
 }
 
+// Start The Program (Create Dialog Box)
+// Return: 0 as Integer
 EXPORT int CALLBACK start()
 {
     dlghnd = CreateDialog(hInst, TEXT(".wav Player"), NULL, DlgProc);
@@ -110,7 +145,9 @@ EXPORT int CALLBACK start()
     return 0;
 }
 
-
+// Reverse The Sound (Modify The Buffer Array to Reverse the Sound Recorded)
+// Pre: pBuffer as Byte Pointer
+// Pre: iLength as Integer
 void ReverseMemory(BYTE* pBuffer, int iLength)
 {
     BYTE b;
@@ -123,7 +160,8 @@ void ReverseMemory(BYTE* pBuffer, int iLength)
         pBuffer[iLength - i - 1] = b;
     }
 }
- 
+
+// Callback Function That Processes Messages Sent To Dialog Box
 BOOL CALLBACK DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     static BOOL         bRecording, bPlaying, bReverse, bPaused,

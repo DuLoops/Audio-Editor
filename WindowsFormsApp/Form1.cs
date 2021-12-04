@@ -15,12 +15,16 @@ using System.Threading;
 
 namespace WindowsFormsApp
 {
+    // Complex Struct Representing Complex Number
+    // Real Portion as re (double)
+    // Imaginary Portion as im (double)
     public struct Complex
     {
         public double re;
         public double im;
     }
 
+    // Unsafe For Casting Integer Pointer to Byte Pointer 
     public unsafe partial class Form1 : Form
     {
         [DllImport("DLL.dll", CharSet = CharSet.Auto)]
@@ -98,6 +102,7 @@ namespace WindowsFormsApp
         private static readonly Object obj = new Object();
 
 
+        // Read Header (Read and Assign Variable From a Wave File
         public void readHeader(string filename)
         {
             BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open));
@@ -135,6 +140,7 @@ namespace WindowsFormsApp
             }
         }
 
+        // Display Wave on the Graph
         public void displayWave()
         {
             chart1.Series[0].Points.Clear();
@@ -144,6 +150,7 @@ namespace WindowsFormsApp
             }
         }
 
+        // Display Recorded Wave On Graph
         public void displayRecorded()
         {
             chartRecorded.Series[0].Points.Clear();
@@ -153,6 +160,7 @@ namespace WindowsFormsApp
             }
         }
 
+        // Perform DFT On Wave
         public Complex[] DFT()
         {
             long start = (long)chart1.ChartAreas[0].CursorX.SelectionStart;
@@ -186,8 +194,13 @@ namespace WindowsFormsApp
             return cArray;
         }
 
+        // Number Of Threads Used
         int numThread = 4;
 
+
+        // Perform DFT Using Threading
+        // Pre: setThread as Integer (Number of Threads Used)
+        // Return: Complex Array Of Wave Value After DFT
         public Complex[] DFTthreading(int setThread)
         {
 
@@ -227,7 +240,10 @@ namespace WindowsFormsApp
             return cArray;
         }
 
-
+        // Create Threads For Increasing DFT Performance
+        // Pre: cArray as Complex Array
+        // Pre: threadCount as Integer (Number of Threads)
+        // Pre: dftLen as Integer (Length of the Selected Wave)
         public void DFTthreadProc(Complex[] cArray, int threadCount, int dftLen)
         {
 
@@ -249,6 +265,10 @@ namespace WindowsFormsApp
             }
         }
 
+        // Helper Function To Calcuate DFT
+        // Pre: cArray as Complex Array
+        // Pre: f as Integer (Representing Frequency)
+        // Pre: dftLen as Integer (Length of the Selected Wave)
         public void binCalc(Complex[] cArray, int f, int dftLen)
         {
             for (int t = 0; t < dftLen; t++)
@@ -260,6 +280,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Windowing
         public byte[] windowing()
         {
             long start = userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
@@ -288,6 +309,7 @@ namespace WindowsFormsApp
             return wArray;
         }
 
+        // Windowing For DFT
         public Complex[] windowingDFT()
         {
             long start = userSelectionStart = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
@@ -331,7 +353,7 @@ namespace WindowsFormsApp
             return cArray;
         }
 
-
+        // Setup Style Chart
         public void styleChart()
         {
             ChartArea ca = chart1.ChartAreas[0];  // quick reference
@@ -360,6 +382,7 @@ namespace WindowsFormsApp
         }
 
 
+        // Zoom In On The Graph
         private class ZoomFrame
         {
             public double XStart { get; set; }
@@ -367,6 +390,8 @@ namespace WindowsFormsApp
             public double YStart { get; set; }
             public double YFinish { get; set; }
         }
+
+        // 
         private void chart1_MouseWheel(object sender, MouseEventArgs e)
         {
             var chart = (Chart)sender;
@@ -405,7 +430,7 @@ namespace WindowsFormsApp
             catch { }
         }
 
-
+        // Initialize Form
         public Form1()
         {
             InitializeComponent();
@@ -430,6 +455,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Create Menu UI
         private void openWaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
             OpenFileDialog open = new OpenFileDialog();
@@ -459,6 +485,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Button For Pausing
         private void pause_Click(object sender, EventArgs e)
         {
             if (recordedRadio.Checked && importedRadio.Checked)
@@ -497,6 +524,7 @@ namespace WindowsFormsApp
             return bList.ToArray();
         }
 
+        // Copy Button (Select Section Of Waves On Graph To Copy)
         private void copy_Click(object sender, EventArgs e)
         {
             copied = true;
@@ -516,6 +544,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Past Button (Select Section Of Waves On Graph To Paste)
         private void Paste_Click(object sender, EventArgs e)
         {
             long pasteDest = (long)chartRecorded.ChartAreas[0].CursorX.SelectionStart;
@@ -545,6 +574,7 @@ namespace WindowsFormsApp
             displayRecorded();
         }
 
+        // Cut Button (Select Section Of Waves On Graph To Cut)
         private void Cut_Click(object sender, EventArgs e)
         {
             ChartArea ca = chartRecorded.ChartAreas[0];
@@ -573,6 +603,8 @@ namespace WindowsFormsApp
             displayRecorded();
             ca.CursorX.SetSelectionPosition(0, 0);
         }
+
+        // Play Button (Play Sound)
         private void play_click(object sender, EventArgs e)
         {
             if (recordedRadio.Checked && importedRadio.Checked)
@@ -600,6 +632,7 @@ namespace WindowsFormsApp
 
         }
 
+        // Record Button
         private void recordBtn_Click(object sender, EventArgs e)
         {
             endBtn.Enabled = true;
@@ -607,6 +640,7 @@ namespace WindowsFormsApp
             Rrecord();
         }
 
+        // End Record Button
         private void endBtn_Click(object sender, EventArgs e)
         {
             playBtn.Enabled = true;
@@ -616,7 +650,7 @@ namespace WindowsFormsApp
             loadAudioRecorded();
         }
 
-
+        // Load Audio Recorded Button
         public void loadAudioRecorded()
         {
             IntPtr bufferP = RgetBuffer();
@@ -648,6 +682,7 @@ namespace WindowsFormsApp
         {
         }
 
+        // Display Menu UI
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
             int numsamples = waveHeader.sampleRate * waveHeader.subchunk2Size;
@@ -683,6 +718,8 @@ namespace WindowsFormsApp
 
         }
 
+        // Windowing Button (Displayed Windowed Wave)
+        // Pop Up Form To Display Windowed Value On Graph
         private void window_click(object sender, EventArgs e)
         {
             if (chartRecorded.ChartAreas[0].CursorX.SelectionEnd == chartRecorded.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chartRecorded.ChartAreas[0].CursorX.SelectionEnd))
@@ -704,6 +741,7 @@ namespace WindowsFormsApp
             windowForm.Show();
         }
 
+        // Benchmark Button (Display Function Run Time)
         private void benchmark_Click(object sender, EventArgs e)
         {
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
@@ -731,6 +769,7 @@ namespace WindowsFormsApp
 
         }
 
+        // DFT Button (Pop Up New Form To Display DFT Value On Graph)
         private void dft_click(object sender, EventArgs e)
         {
             if (chart1.ChartAreas[0].CursorX.SelectionEnd == chart1.ChartAreas[0].CursorX.SelectionStart || double.IsNaN(chart1.ChartAreas[0].CursorX.SelectionEnd))
