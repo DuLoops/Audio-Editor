@@ -1,5 +1,4 @@
-﻿
-namespace WindowsFormsApp
+﻿namespace WindowsFormsApp
 {
     partial class Form2
     {

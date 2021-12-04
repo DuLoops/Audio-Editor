@@ -33,7 +33,6 @@ TCHAR szAppName[] = TEXT("Record");
 int WINAPI DllMain(HINSTANCE hInstance, DWORD fdwReason, PVOID pvReserved)
 {
     hInst = hInstance;
-    return TRUE;
 }
 
 EXPORT PBYTE RgetBuffer() {

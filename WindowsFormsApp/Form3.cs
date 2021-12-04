@@ -30,6 +30,7 @@ namespace WindowsFormsApp
         {
         }
 
+        // Display Windowing 
         public void displayWindowing()
         {
             chart1.Series[0].Points.Clear();
@@ -39,6 +40,7 @@ namespace WindowsFormsApp
             }
         }
 
+        // Display Windowed DFT
         public void displayWDFT()
         {
             dftChart.Series[0].Points.Clear();
