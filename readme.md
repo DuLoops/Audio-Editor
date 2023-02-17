@@ -3,7 +3,7 @@
 ## User Guide
 
 1. Clone the current repository.
-2. Click the shortcut of the desired program (audio editor or image editor).
+2. Click the .exe shortcut of the desired program (audio editor or image editor).
 3. Use the functionalities provided in the program according to your requirement.
 
 This project is an audio and image editor developed in C# using WPF framework. The project provides the following functionalities for audio and image editing:
